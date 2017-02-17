@@ -16,6 +16,10 @@
   ],
   "author": "jianl",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jian263994241/fis3-plugin-abc"
+  },
   "dependencies": {
     "autoprefixer": "^6.7.3",
     "less": "^2.7.2",

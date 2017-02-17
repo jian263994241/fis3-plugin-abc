@@ -1,7 +1,7 @@
 {
-  "name": "fis3-optimizer-html",
+  "name": "fis3-parser-browserify",
   "version": "1.0.0",
-  "description": "fis3 optimizer",
+  "description": "fis3 browserify 插件",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,17 +9,16 @@
   "keywords": [
     "fis",
     "cue",
-    "postcss",
-    "html optimizer",
-    "fis3 optimizer"
+    "babel",
+    "es2015",
+    "es6",
+    "browserify",
+    "fis3 browserify"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jian263994241/fis3-plugin-abc"
   },
   "author": "jianl",
-  "license": "ISC",
-  "dependencies": {
-    "html-minifier": "^3.3.1"
-  }
+  "license": "ISC"
 }
