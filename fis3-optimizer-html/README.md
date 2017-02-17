@@ -5,8 +5,12 @@
 
 fis.match('third/**', {
   optimizer: fis.plugin('html',{
-    option: ...
-    //配置
+    option: {
+      removeAttributeQuotes: true,
+      collapseWhitespace: true,
+      removeComments: true
+      // .... 配置
+    }
   });
 });
 
