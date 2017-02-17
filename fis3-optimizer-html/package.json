@@ -1,0 +1,18 @@
+{
+  "name": "fis3-optimizer-html",
+  "version": "1.0.0",
+  "description": "fis3 optimizer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "fis",
+    "cue"
+  ],
+  "author": "jianl",
+  "license": "ISC",
+  "dependencies": {
+    "html-minifier": "^3.3.1"
+  }
+}
