@@ -1,7 +1,7 @@
 'use strict';
 var path = require('path');
 
-var through2  = require('through2');
+var through2 = require('through2');
 var deasync = require('deasync');
 var browserify = require('browserify');
 var browserifyInc = require('browserify-incremental')
@@ -44,27 +44,25 @@ requires (array)打包依赖
 
 module.exports = function(content, file, conf) {
 
-  var option = conf.option || {};
+    var option = conf.option || {};
 
-  var defaultOpt = {
-    shims: {},
-    externals: '', //str or array
-    expose: null,
-    requires : null,
-    standalone: false
-  };
+    var defaultOpt = {
+        shims: {},
+        externals: '', //str or array
+        expose: null,
+        requires: null,
+        standalone: false
+    };
 
-  option = Object.assign(defaultOpt, option || {});
+    option = Object.assign(defaultOpt, option || {});
 
-  var _ = fis.util;
+    var _ = fis.util;
 
-  var _shimixify = shimixify.configure({
-    shims: option.shims
-  });
+    var _shimixify = shimixify.configure({
+        shims: option.shims
+    });
 
-  var _partialify = partialify.onlyAllow(['xml', 'csv', 'html', 'svg', 'json', 'tpl']);
-
-  return function(content, file, conf) {
+    var _partialify = partialify.onlyAllow(['xml', 'csv', 'html', 'svg', 'json', 'tpl']);
 
     var _bID = _.md5(file.origin, 8);
 
@@ -79,72 +77,78 @@ module.exports = function(content, file, conf) {
     var isDone = false;
 
     var bConfig = {
-      debug: debug ,
-      extensions: ['.js', '.es6', '.jsx'],
-      fullPaths: debug,
-      cache: {},
-      packageCache: {},
-      paths: [path.resolve(__dirname, '../../node_modules'), './node_modules', './']
+        debug: debug,
+        extensions: ['.js', '.es6', '.jsx'],
+        fullPaths: debug,
+        cache: {},
+        packageCache: {},
+        paths: [path.resolve(__dirname, '../../node_modules'), './node_modules', './']
     };
 
-    if(option.standalone){
-      bConfig.standalone = option.standalone;
+    if (option.standalone) {
+        bConfig.standalone = option.standalone;
     }
 
     var b = browserify(bConfig);
 
-    browserifyInc(b, {cacheFile: cacheFile});
+    browserifyInc(b, {
+        cacheFile: cacheFile
+    });
 
-    if(!option.expose){
-      b.add(file.realpath);
-    }else{
-      b.require(file.realpath, {expose: option.expose});
+    if (!option.expose) {
+        b.add(file.realpath);
+    } else {
+        b.require(file.realpath, {
+            expose: option.expose
+        });
     }
 
-    if(option.requires){
-      option.requires.forEach(function(r){
-        if(typeof r === 'string'){
-          b.require(r);
-        }else{
-          b.require(Object.keys(r)[0], {expose : Object.values(r)[0]});
-        }
-      });
+    if (option.requires) {
+        option.requires.forEach(function(r) {
+            if (typeof r === 'string') {
+                b.require(r);
+            } else {
+                b.require(Object.keys(r)[0], {
+                    expose: Object.values(r)[0]
+                });
+            }
+        });
     }
     b.plugin(collapser);
 
     b.external(option.externals);
 
     b.pipeline.get('deps')
-    .on('data', function(obj){
-      file.cache.addDeps(obj.file);
-    });
+        .on('data', function(obj) {
+            file.cache.addDeps(obj.file);
+        });
 
     //编译css
     b.transform(cssy, {
-      global: true
+        global: true
     });
 
     b.transform(_shimixify, {
-      global: true
+        global: true
     });
 
     b.transform(eslintify, {
-      baseConfig: require('./eslintrc'),
-      formatter:'stylish', //codeframe,table,stylish
-      continuous: true,
-      useEslintrc: false
+        baseConfig: require('./eslintrc'),
+        formatter: 'stylish', //codeframe,table,stylish
+        continuous: true,
+        useEslintrc: false
     });
 
     // 编译 es6 &&  react
     b.transform(babelify, {
-      presets: [es2015, react, stage1],
-      plugins: [
-        transformRegenerator,
-        transformRuntime,
-        transformFunctionBind,
-        transformObjectAssign
-      ],
-      extensions: ['.es6', '.jsx', '.js']
+        presets: [es2015, react, stage1],
+        plugins: [
+            transformRegenerator,
+            transformRuntime,
+            transformFunctionBind,
+            transformObjectAssign
+        ],
+        extensions: ['.es6', '.jsx', '.js']
     });
 
 
@@ -154,38 +158,42 @@ module.exports = function(content, file, conf) {
 
     var buffer = '';
 
-    var stream = through2(write,end);
+    var stream = through2(write, end);
 
-    function write(chunk, enc, next){
-      buffer += chunk.toString();
-      next();
+    function write(chunk, enc, next) {
+        buffer += chunk.toString();
+        next();
     }
 
-    function end(done){
-      isDone = true;
-      done();
+    function end(done) {
+        isDone = true;
+        done();
     }
 
-    b.bundle().on('error', function(err){
-      isDone = true;
-      console.log(err.stack? err.stack : err);
-      fis.once('release:end', function() {
-        _.del(file.cache.cacheInfo);
-      });
+    b.bundle().on('error', function(err) {
+        isDone = true;
+        console.log(err.stack ? err.stack : err);
+        fis.once('release:end', function() {
+            _.del(file.cache.cacheInfo);
+        });
     }).pipe(stream);
 
     // 使用 deasync 让 browserify 同步输出到 content
     deasync.loopWhile(function() {
-      return !isDone;
+        return !isDone;
     });
 
     content = buffer;
 
-    if(option.standalone){
-      content = derequire(content, [ { from: 'require', to: '_dereq_' }, { from: 'define', to: '_defi_' } ]);
+    if (option.standalone) {
+        content = derequire(content, [{
+            from: 'require',
+            to: '_dereq_'
+        }, {
+            from: 'define',
+            to: '_defi_'
+        }]);
     }
 
     return content;
-  }
-
 }

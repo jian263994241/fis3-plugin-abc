@@ -19,3 +19,34 @@
 - babel-plugin-transform-function-bind
 
 编译 es2015, react , 支持 babel stage-1 环境
+
+
+```javascript
+
+//development 环境 debug：true
+fis.once('compile:start', function(file) {
+  if (fis.project.currentMedia() != "dev") {
+    process.env.NODE_ENV = 'production';
+  }else{
+    process.env.NODE_ENV = 'development';
+  }
+});
+
+
+//fis-conf.js
+
+fis.match('app.js',{
+  parser: fis.plugin('browserify',{
+    option:{
+      shims:{
+        'react':'global.React',
+        'react-dom' :'global.ReactDOM',
+        'react-router': 'global.ReactRouter',
+        'antd': 'global.antd'
+      }
+    }
+  })
+});
+
+
+```
