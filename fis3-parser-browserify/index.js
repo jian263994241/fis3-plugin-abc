@@ -25,7 +25,6 @@ var transformFunctionBind = require('babel-plugin-transform-function-bind');
 
 var collapser = require('bundle-collapser/plugin');
 
-
 /*
 
 调用
@@ -43,7 +42,9 @@ requires (array)打包依赖
 
 */
 
-module.exports = function(option) {
+module.exports = function(content, file, conf) {
+
+  var option = conf.option || {};
 
   var defaultOpt = {
     shims: {},

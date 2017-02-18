@@ -16,7 +16,7 @@
     "fis3 browserify"
   ],
   "dependencies":{
-    "deasync": "^0.1.7",
+    "autoprefixer": "^6.3.6",
     "babel-eslint": "^7.1.0",
     "babel-plugin-transform-function-bind": "^6.8.0",
     "babel-plugin-transform-object-assign": "^6.8.0",
@@ -29,6 +29,7 @@
     "babelify": "^7.3.0",
     "browserify": "^13.3.0",
     "browserify-incremental": "^3.1.1",
+    "deasync": "^0.1.7",
     "derequire": "^2.0.6",
     "eslint-plugin-babel": "^3.3.0",
     "eslint-plugin-react": "^6.7.1",
