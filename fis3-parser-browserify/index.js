@@ -108,12 +108,13 @@ module.exports = function(content, file, conf) {
             if (typeof r === 'string') {
                 b.require(r);
             } else {
-                b.require(Object.keys(r)[0], {
-                    expose: Object.values(r)[0]
+                b.require(r.path, {
+                    expose: r.expose
                 });
             }
         });
     }
+    
     b.plugin(collapser);
 
     b.external(option.externals);
