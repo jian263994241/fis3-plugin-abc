@@ -8,6 +8,7 @@ var less = require('less');
 var safe = require('postcss-safe-parser');
 var sorting = require('postcss-sorting');
 var autoprefixer = require('autoprefixer');
+var cssnano = require('cssnano');
 
 var func_start = "(function() { var head = document.getElementsByTagName('head')[0]; var style = document.createElement('style'); style.type = 'text/css';",
   func_end = "if (style.styleSheet){ style.styleSheet.cssText = css; } else { style.appendChild(document.createTextNode(css)); } head.appendChild(style);}())";
@@ -64,7 +65,8 @@ module.exports = function(file, transformOptions) {
 
     var postcssPlus = [
       sorting(),
-      autoprefixer({ browsers: ['> 1%', 'iOS 7'] })
+      autoprefixer({ browsers: ['> 1%', 'iOS 7'] }),
+      cssnano()
     ];
 
     var cssname = {};
