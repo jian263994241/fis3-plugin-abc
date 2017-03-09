@@ -99,6 +99,11 @@ module.exports = function(file, transformOptions) {
         }
         if (url) {
           var quote = _.stringQuote(url);
+
+          if(/^(data:)|(https:\/\/)|(http:\/\/)/.test(quote.rest)){
+            return m;
+          }
+
           var info = _.query(quote.rest);
 
           if(path.isAbsolute(info.rest)){
