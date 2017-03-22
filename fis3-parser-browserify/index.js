@@ -114,7 +114,7 @@ module.exports = function(content, file, conf) {
             }
         });
     }
-    
+
     b.plugin(collapser);
 
     b.external(option.externals);
@@ -122,6 +122,7 @@ module.exports = function(content, file, conf) {
     b.pipeline.get('deps')
         .on('data', function(obj) {
             file.cache.addDeps(obj.file);
+            process.stdout.write('.');
         });
 
     //编译css
@@ -163,6 +164,7 @@ module.exports = function(content, file, conf) {
 
     function write(chunk, enc, next) {
         buffer += chunk.toString();
+        process.stdout.write('.');
         next();
     }
 
