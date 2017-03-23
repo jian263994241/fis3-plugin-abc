@@ -5,6 +5,8 @@ var through2 = require('through2');
 var deasync = require('deasync');
 var browserify = require('browserify');
 var browserifyInc = require('browserify-incremental')
+var banner = require('browserify-banner');
+
 
 var partialify = require('partialify/custom');
 var cssy = require('./cssy');
@@ -21,7 +23,6 @@ var transformRegenerator = require('babel-plugin-transform-regenerator');
 var transformRuntime = require('babel-plugin-transform-runtime');
 var transformObjectAssign = require('babel-plugin-transform-object-assign');
 var transformFunctionBind = require('babel-plugin-transform-function-bind');
-
 
 var collapser = require('bundle-collapser/plugin');
 
@@ -82,7 +83,8 @@ module.exports = function(content, file, conf) {
         fullPaths: debug,
         cache: {},
         packageCache: {},
-        paths: [path.resolve(__dirname, '../../node_modules'), './node_modules', './']
+        paths: [path.resolve(__dirname, '../../node_modules'), './node_modules', './'],
+        externalRequireName: 'requireExt'
     };
 
     if (option.standalone) {
@@ -114,8 +116,17 @@ module.exports = function(content, file, conf) {
             }
         });
     }
-
+    //修改id减少包体积
     b.plugin(collapser);
+    //增加banner
+    b.plugin(banner, {
+      template: `
+<%= _.startCase(pkg.name) %> v<%= pkg.version %> (<%= moment().format('MMMM Do YYYY') %>)
+<%= pkg.description %>
+<%= pkg.homepage %>
+@author  <%= pkg.author.name %>
+@license <%= pkg.license %>`
+    });
 
     b.external(option.externals);
 
@@ -124,6 +135,7 @@ module.exports = function(content, file, conf) {
             file.cache.addDeps(obj.file);
             process.stdout.write('.');
         });
+
 
     //编译css
     b.transform(cssy, {
@@ -143,7 +155,7 @@ module.exports = function(content, file, conf) {
 
     // 编译 es6 &&  react
     b.transform(babelify, {
-        presets: [es2015, react, stage1],
+        presets: [react, es2015, stage1],
         plugins: [
             transformRegenerator,
             transformRuntime,
@@ -187,16 +199,6 @@ module.exports = function(content, file, conf) {
     });
 
     content = buffer;
-
-    if (option.standalone) {
-        content = derequire(content, [{
-            from: 'require',
-            to: '_dereq_'
-        }, {
-            from: 'define',
-            to: '_defi_'
-        }]);
-    }
 
     return content;
 }
