@@ -52,7 +52,8 @@ module.exports = function(content, file, conf) {
         externals: '', //str or array
         expose: null,
         requires: null,
-        standalone: false
+        standalone: false,
+        externalRequireName: 'requireExt'
     };
 
     option = Object.assign(defaultOpt, option || {});
@@ -84,7 +85,7 @@ module.exports = function(content, file, conf) {
         cache: {},
         packageCache: {},
         paths: [path.resolve(__dirname, '../../node_modules'), './node_modules', './'],
-        externalRequireName: 'requireExt'
+        externalRequireName: option.externalRequireName
     };
 
     if (option.standalone) {
