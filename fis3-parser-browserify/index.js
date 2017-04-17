@@ -14,15 +14,16 @@ var eslintify = require('eslintify');
 var shimixify = require('shimixify');
 var derequire = require('derequire');
 
-
 var babelify = require('babelify');
-var es2015 = require('babel-preset-es2015');
+var env = require('babel-preset-env');
 var react = require('babel-preset-react');
 var stage1 = require('babel-preset-stage-1');
 var transformRegenerator = require('babel-plugin-transform-regenerator');
 var transformRuntime = require('babel-plugin-transform-runtime');
 var transformObjectAssign = require('babel-plugin-transform-object-assign');
 var transformFunctionBind = require('babel-plugin-transform-function-bind');
+var transformDecorators = require('babel-plugin-transform-decorators');
+var syntaxAsyncGenerators = require('babel-plugin-syntax-async-generators');
 
 var collapser = require('bundle-collapser/plugin');
 
@@ -52,8 +53,8 @@ module.exports = function(content, file, conf) {
         externals: '', //str or array
         expose: null,
         requires: null,
-        standalone: false,
-        externalRequireName: 'requireExt'
+        umd: undefined,
+        externalRequireName: 'require'
     };
 
     option = Object.assign(defaultOpt, option || {});
@@ -88,8 +89,8 @@ module.exports = function(content, file, conf) {
         externalRequireName: option.externalRequireName
     };
 
-    if (option.standalone) {
-        bConfig.standalone = option.standalone;
+    if (option.umd) {
+        bConfig.standalone = option.umd;
     }
 
     var b = browserify(bConfig);
@@ -156,20 +157,25 @@ module.exports = function(content, file, conf) {
 
     // 编译 es6 &&  react
     b.transform(babelify, {
-        presets: [react, es2015, stage1],
-        plugins: [
-            transformRegenerator,
-            transformRuntime,
-            transformFunctionBind,
-            transformObjectAssign
-        ],
-        extensions: ['.es6', '.jsx', '.js']
+      presets: [
+        react, [env, {
+          targets: {
+            browsers: ["last 2 versions", "safari >= 7"]
+          }
+        }],
+        stage1
+      ],
+      plugins: [
+        transformRegenerator,
+        transformRuntime,
+        transformFunctionBind,
+        transformObjectAssign
+      ],
+      extensions: ['.es6', '.jsx', '.js']
     });
 
 
     b.transform(_partialify);
-
-
 
     var buffer = '';
 
@@ -199,7 +205,9 @@ module.exports = function(content, file, conf) {
         return !isDone;
     });
 
-    content = buffer;
+    // content = buffer;
+
+    content = derequire(buffer, [{ from: 'require', to: '_dereq_' }, { from: 'define', to: '_defi_' } ]);
 
     return content;
 }
