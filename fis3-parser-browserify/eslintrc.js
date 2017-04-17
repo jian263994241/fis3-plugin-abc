@@ -2,6 +2,7 @@ var globals = [
   "process",
   "global",
   "window",
+  "arguments",
   "__filename",
   "__dirname",
   "__uri",
