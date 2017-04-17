@@ -130,7 +130,9 @@ module.exports = function(content, file, conf) {
 
   b.pipeline.get('deps')
     .on('data', function(obj) {
-      file.cache.addDeps(obj.file);
+      if(!/node_modules/.test(obj.file) && /^\/.+/.test(obj.file)){
+        file.cache.addDeps(obj.file);
+      }
     });
 
 
