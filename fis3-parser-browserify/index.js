@@ -46,168 +46,167 @@ requires (array)打包依赖
 
 module.exports = function(content, file, conf) {
 
-    var option = conf.option || {};
+  var option = conf.option || {},
+    defaultOpt = {
+      shims: {},
+      externals: '', //str or array
+      expose: null,
+      requires: null,
+      umd: undefined,
+      externalRequireName: 'require'
+    },
+    _ = fis.util,
+    project = fis.project;
 
-    var defaultOpt = {
-        shims: {},
-        externals: '', //str or array
-        expose: null,
-        requires: null,
-        umd: undefined,
-        externalRequireName: 'require'
-    };
 
-    option = Object.assign(defaultOpt, option || {});
+  option = Object.assign(defaultOpt, option || {});
 
-    var _ = fis.util;
 
-    var _shimixify = shimixify.configure({
-        shims: option.shims
+  var _shimixify = shimixify.configure({ shims: option.shims }),
+    _partialify = partialify.onlyAllow(['xml', 'csv', 'html', 'svg', 'json', 'tpl']),
+    _bID = _.md5(file.origin, 8),
+    currentMedia = project.currentMedia(),
+    debug = Boolean(process.env.NODE_ENV === 'development'),
+    cachePath = path.join(project.getCachePath('compile'), 'release-' + currentMedia),
+    isDone = false;
+
+  var cacheFile = path.join(cachePath, 'browserifyInc' + _bID + '.json');
+
+  var bConfig = {
+    debug: debug,
+    extensions: ['.js', '.es6', '.jsx'],
+    fullPaths: debug,
+    cache: {},
+    packageCache: {},
+    paths: [path.resolve(__dirname, '../../node_modules'), './node_modules', './'],
+    externalRequireName: option.externalRequireName
+  };
+
+  if (option.umd) {
+    bConfig.standalone = option.umd;
+  }
+
+  var b = browserify(bConfig);
+
+  browserifyInc(b, {
+    cacheFile: cacheFile
+  });
+
+  if (!option.expose) {
+    b.add(file.realpath);
+  } else {
+    b.require(file.realpath, {
+      expose: option.expose
     });
+  }
 
-    var _partialify = partialify.onlyAllow(['xml', 'csv', 'html', 'svg', 'json', 'tpl']);
-
-    var _bID = _.md5(file.origin, 8);
-
-    var currentMedia = fis.project.currentMedia();
-
-    var debug = Boolean(process.env.NODE_ENV === 'development');
-
-    var cachePath = path.join(fis.project.getCachePath('compile'), 'release-' + currentMedia);
-
-    var cacheFile = path.join(cachePath, 'browserifyInc' + _bID + '.json');
-
-    var isDone = false;
-
-    var bConfig = {
-        debug: debug,
-        extensions: ['.js', '.es6', '.jsx'],
-        fullPaths: debug,
-        cache: {},
-        packageCache: {},
-        paths: [path.resolve(__dirname, '../../node_modules'), './node_modules', './'],
-        externalRequireName: option.externalRequireName
-    };
-
-    if (option.umd) {
-        bConfig.standalone = option.umd;
-    }
-
-    var b = browserify(bConfig);
-
-    browserifyInc(b, {
-        cacheFile: cacheFile
+  if (option.requires) {
+    option.requires.forEach(function(r) {
+      if (typeof r === 'string') {
+        b.require(r);
+      } else {
+        b.require(r.path, {
+          expose: r.expose
+        });
+      }
     });
+  }
+  //修改id减少包体积
+  b.plugin(collapser);
+  //增加banner
+  var pkgExit = _.find('package.json').length > 0 ;
 
-    if (!option.expose) {
-        b.add(file.realpath);
-    } else {
-        b.require(file.realpath, {
-            expose: option.expose
-        });
-    }
-
-    if (option.requires) {
-        option.requires.forEach(function(r) {
-            if (typeof r === 'string') {
-                b.require(r);
-            } else {
-                b.require(r.path, {
-                    expose: r.expose
-                });
-            }
-        });
-    }
-    //修改id减少包体积
-    b.plugin(collapser);
-    //增加banner
+  if(pkgExit){
     b.plugin(banner, {
-      template: `
-<%= _.startCase(pkg.name) %> v<%= pkg.version %> (<%= moment().format('MMMM Do YYYY') %>)
-<%= pkg.description %>
-<%= pkg.homepage %>
-@author  <%= pkg.author.name %>
-@license <%= pkg.license %>`
+      template: '<%= _.startCase(pkg.name) %> v<%= pkg.version %> (<%= moment().format(\'MMMM Do YYYY\') %>)\n' +
+        '<%= pkg.description %>\n' +
+        '<%= pkg.homepage %>\n' +
+        '@author  <%= pkg.author.name %>\n' +
+        '@license <%= pkg.license %>\n'
     });
+  }
 
-    b.external(option.externals);
+  b.external(option.externals);
 
-    b.pipeline.get('deps')
-        .on('data', function(obj) {
-            file.cache.addDeps(obj.file);
-            process.stdout.write('.');
-        });
-
-
-    //编译css
-    b.transform(cssy, {
-        global: true
-    });
-
-    b.transform(_shimixify, {
-        global: true
-    });
-
-    b.transform(eslintify, {
-        baseConfig: require('./eslintrc'),
-        formatter: 'stylish', //codeframe,table,stylish
-        continuous: true,
-        useEslintrc: false
-    });
-
-    // 编译 es6 &&  react
-    b.transform(babelify, {
-      presets: [
-        react, [env, {
-          targets: {
-            browsers: ["last 2 versions", "safari >= 7"]
-          }
-        }],
-        stage1
-      ],
-      plugins: [
-        transformRegenerator,
-        transformRuntime,
-        transformFunctionBind,
-        transformObjectAssign
-      ],
-      extensions: ['.es6', '.jsx', '.js']
+  b.pipeline.get('deps')
+    .on('data', function(obj) {
+      file.cache.addDeps(obj.file);
     });
 
 
-    b.transform(_partialify);
+  //编译css
+  b.transform(cssy, {
+    global: true
+  });
 
-    var buffer = '';
+  b.transform(_shimixify, {
+    global: true
+  });
 
-    var stream = through2(write, end);
+  b.transform(eslintify, {
+    baseConfig: require('./eslintrc'),
+    formatter: 'stylish', //codeframe,table,stylish
+    continuous: true,
+    useEslintrc: false
+  });
 
-    function write(chunk, enc, next) {
-        buffer += chunk.toString();
-        process.stdout.write('.');
-        next();
-    }
+  // 编译 es6 &&  react
+  b.transform(babelify, {
+    presets: [
+      react, [env, {
+        targets: {
+          browsers: ["last 2 versions", "safari >= 7"]
+        }
+      }],
+      stage1
+    ],
+    plugins: [
+      transformRegenerator,
+      transformRuntime,
+      transformFunctionBind,
+      transformObjectAssign
+    ],
+    extensions: ['.es6', '.jsx', '.js']
+  });
 
-    function end(done) {
-        isDone = true;
-        done();
-    }
 
-    b.bundle().on('error', function(err) {
-        isDone = true;
-        console.log(err.stack ? err.stack : err);
-        fis.once('release:end', function() {
-            _.del(file.cache.cacheInfo);
-        });
-    }).pipe(stream);
+  b.transform(_partialify);
 
-    // 使用 deasync 让 browserify 同步输出到 content
-    deasync.loopWhile(function() {
-        return !isDone;
+  var buffer = '';
+
+  var stream = through2(write, end);
+
+  function write(chunk, enc, next) {
+    buffer += chunk.toString();
+    process.stdout.write('.');
+    next();
+  }
+
+  function end(done) {
+    isDone = true;
+    done();
+  }
+
+  b.bundle().on('error', function(err) {
+    isDone = true;
+    console.log(err.stack ? err.stack : err);
+    fis.once('release:end', function() {
+      _.del(file.cache.cacheInfo);
     });
+  }).pipe(stream);
 
-    // content = buffer;
+  // 使用 deasync 让 browserify 同步输出到 content
+  deasync.loopWhile(function() {
+    return !isDone;
+  });
 
-    content = derequire(buffer, [{ from: 'require', to: '_dereq_' }, { from: 'define', to: '_defi_' } ]);
+  content = derequire(buffer, [{
+    from: 'require',
+    to: '_dereq_'
+  }, {
+    from: 'define',
+    to: '_defi_'
+  }]);
 
-    return content;
+  return content;
 }
