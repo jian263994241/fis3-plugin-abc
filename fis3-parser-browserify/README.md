@@ -10,7 +10,7 @@
 - bundle-collapser
 
 - babelify
-- babel-preset-es2015
+- babel-preset-env
 - babel-preset-react
 - babel-preset-stage-1
 - babel-plugin-transform-regenerator
