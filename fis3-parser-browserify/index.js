@@ -144,9 +144,9 @@ module.exports = function(content, file, conf) {
       stage0
     ],
     plugins: [
-      path.resolve(__dirname, '../babel-plugin-transform-decorators-legacy'),
-      require('babel-plugin-transform-runtime'),
-      require('babel-plugin-transform-object-assign')
+      require.resolve('babel-plugin-transform-decorators-legacy'),
+      require.resolve('babel-plugin-transform-runtime'),
+      require.resolve('babel-plugin-transform-object-assign')
     ],
     extensions: ['.es6', '.jsx', '.js']
   });

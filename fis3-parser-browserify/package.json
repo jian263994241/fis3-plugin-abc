@@ -1,6 +1,6 @@
 {
   "name": "fis3-parser-browserify",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "fis3 browserify 插件",
   "main": "index.js",
   "scripts": {
