@@ -5,8 +5,6 @@ var through2 = require('through2');
 var deasync = require('deasync');
 var browserify = require('browserify');
 var browserifyInc = require('browserify-incremental')
-var banner = require('browserify-banner');
-
 
 var partialify = require('partialify/custom');
 var cssy = require('./cssy');
@@ -17,13 +15,7 @@ var derequire = require('derequire');
 var babelify = require('babelify');
 var env = require('babel-preset-env');
 var react = require('babel-preset-react');
-var stage1 = require('babel-preset-stage-1');
-var transformRegenerator = require('babel-plugin-transform-regenerator');
-var transformRuntime = require('babel-plugin-transform-runtime');
-var transformObjectAssign = require('babel-plugin-transform-object-assign');
-var transformFunctionBind = require('babel-plugin-transform-function-bind');
-var transformDecorators = require('babel-plugin-transform-decorators');
-var syntaxAsyncGenerators = require('babel-plugin-syntax-async-generators');
+var stage0 = require('babel-preset-stage-0');
 
 var collapser = require('bundle-collapser/plugin');
 
@@ -114,17 +106,6 @@ module.exports = function(content, file, conf) {
   //修改id减少包体积
   b.plugin(collapser);
   //增加banner
-  var pkgExit = _.find('package.json').length > 0 ;
-
-  if(pkgExit){
-    b.plugin(banner, {
-      template: '<%= _.startCase(pkg.name) %> v<%= pkg.version %> (<%= moment().format(\'MMMM Do YYYY\') %>)\n' +
-        '<%= pkg.description %>\n' +
-        '<%= pkg.homepage %>\n' +
-        '@author  <%= pkg.author.name %>\n' +
-        '@license <%= pkg.license %>\n'
-    });
-  }
 
   b.external(option.externals);
 
@@ -134,7 +115,6 @@ module.exports = function(content, file, conf) {
         file.cache.addDeps(obj.file);
       }
     });
-
 
   //编译css
   b.transform(cssy, {
@@ -155,18 +135,18 @@ module.exports = function(content, file, conf) {
   // 编译 es6 &&  react
   b.transform(babelify, {
     presets: [
-      react, [env, {
+      react,
+      [env, {
         targets: {
           browsers: ["last 2 versions", "safari >= 7"]
         }
       }],
-      stage1
+      stage0
     ],
     plugins: [
-      transformRegenerator,
-      transformRuntime,
-      transformFunctionBind,
-      transformObjectAssign
+      path.resolve(__dirname, './node_modules/babel-plugin-transform-decorators-legacy'),
+      require('babel-plugin-transform-runtime'),
+      require('babel-plugin-transform-object-assign')
     ],
     extensions: ['.es6', '.jsx', '.js']
   });

@@ -12,11 +12,9 @@
 - babelify
 - babel-preset-env
 - babel-preset-react
-- babel-preset-stage-1
-- babel-plugin-transform-regenerator
+- babel-preset-stage-0
 - babel-plugin-transform-runtime
 - babel-plugin-transform-object-assign
-- babel-plugin-transform-function-bind
 
 编译 es2015, react , 支持 babel stage-1 环境
 
@@ -61,7 +59,7 @@ fis.match('app.js',{
       ],
       externals: ['react', 'reactDOM'], //申明外部模块, 不打包入app.js
       externalRequireName: 'req', // 外部引用模块方法名, 默认: require 设置为req后 require 外部模块:  var $ = req('jQuery');
-      umd: 'app'  // 默认undfined ,  设置名字后 .umd打包  单独引用的时候, 可以访问 window.app 
+      umd: 'app'  // 默认undfined ,  设置名字后 .umd打包  单独引用的时候, 可以访问 window.app
     }
   })
 });
