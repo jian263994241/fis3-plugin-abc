@@ -1,0 +1,23 @@
+{
+    "host": "www.99bill.com",
+    "origin": "https://www.99bill.com",
+    "proxy": [{
+        "host": "https://ebd.99bill.com",
+        "api": "/coc-bill-api"
+    }, {
+        "host": "https://ebd.99bill.com",
+        "api": "/loan-website"
+    }, {
+        "host": "https://jr.99bill.com",
+        "api": "/fpd-sale"
+    }, {
+        "host": "https://jr.99bill.com",
+        "api": "/fpd-platform"
+    }, {
+        "host": "https://jr.99bill.com",
+        "api": "/atp-platform"
+    }, {
+        "host": "https://ebd.99bill.com",
+        "api": "/mobile-website"
+    }]
+}

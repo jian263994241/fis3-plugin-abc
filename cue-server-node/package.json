@@ -1,0 +1,44 @@
+{
+  "author": {
+    "name": "jianl"
+  },
+  "bugs": {
+    "url": "https://github.com/fex-team/fis3-server-node/issues"
+  },
+  "dependencies": {
+    "browser-sync": "^2.18.7",
+    "compression": "^1.6.2",
+    "dev-ip": "^1.0.1",
+    "eruda": "1.2.3",
+    "http-proxy": "^1.15.2"
+  },
+  "description": "cue server node",
+  "devDependencies": {},
+  "directories": {},
+  "dist": {
+    "shasum": "33d604c70721abadf85df18427935afec9506020",
+    "tarball": "https://registry.npmjs.org/cue-server-node/-/cue-server-node-0.1.19.tgz"
+  },
+  "gitHead": "3c24133a0f72a74c7101465be3d340c3cb7044b3",
+  "homepage": "https://github.com/fex-team/fis3-server-node",
+  "keywords": [
+    "fis3",
+    "server",
+    "node"
+  ],
+  "license": "BSD",
+  "main": "index.js",
+  "maintainers": [
+    {
+      "name": "jian263994241",
+      "email": "jianjianfengyun@126.com"
+    }
+  ],
+  "name": "cue-server-node",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.1.21"
+}
