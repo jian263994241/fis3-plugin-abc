@@ -8,8 +8,7 @@ var compress = require('compression');
 
 var proxyConfig = require('./proxy.json');
 
-var vconsolePath = require.resolve('eruda');
-var vconsoleFile = fs.readFileSync(vconsolePath, 'utf8');
+
 
 
 var args = process.argv.join('|');
@@ -104,15 +103,18 @@ middleware.push({
 //   }
 // });
 
+
+var consoleScript = require.resolve('eruda');
+var erudaVersion = require(path.resolve(consoleScript, '../package.json')).version;
+var scriptTmpl = fs.readFileSync('./script-tag.tmpl', 'utf8');
+
 rewriteRules.push({
   match: /<body>/,
   fn: function(match, ServerResponse) {
-    return '<body>'+
-      '<script id="__eruda_script__">' +
-      'var script = document.createElement(\'script\'); script.src = \'/eruda/eruda.min.js?v=1.2.3\'; script.onload = function () { eruda.init() };' +
-      'insertAfter(script, document.getElementById(\'__eruda_script__\'));' +
-      'function insertAfter(el, referenceNode) { referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling); }' +
-      '</script>';
+    return '<body>'+ scriptTmpl
+    .replace('%script%', '/eruda/eruda.min.js?v=' + erudaVersion)
+    .replace('%timestamp%', Date.now())
+    .replace('%log%', 'window.console&&window.console.log&&(console.log("打开移动版console代码:%c eruda.init()", "color: red"))');
   }
 });
 
@@ -131,7 +133,7 @@ server.init({
   server: {
     baseDir: [
       DOCUMENT_ROOT,
-      path.resolve(path.dirname(vconsolePath), '../')
+      path.resolve(path.dirname(consoleScript), '../')
     ],
     directory: true,
     middleware: middleware
@@ -144,7 +146,7 @@ server.init({
   injectChanges: true,
   ui: false,
   logPrefix: "cue",
-  reloadOnRestart: true,
+  // reloadOnRestart: true,
   rewriteRules: rewriteRules
 }, function(e) {
   console.log(' Listening on ' + (https ? 'https' : 'http') + '://127.0.0.1:%d', port);
