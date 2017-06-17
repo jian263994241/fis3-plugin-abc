@@ -114,7 +114,7 @@ rewriteRules.push({
     return '<body>'+ scriptTmpl
     .replace('%script%', '/eruda/eruda.min.js?v=' + erudaVersion)
     .replace('%timestamp%', Date.now())
-    .replace('%log%', 'window.console&&window.console.log&&(console.log("打开移动版console代码:%c eruda.init()", "color: red"))');
+    .replace('%log%', 'window.console&&window.console.log&&(console.log("打开移动版console代码:%c window.eruda && eruda.init()", "color: red"))');
   }
 });
 
@@ -146,7 +146,7 @@ server.init({
   injectChanges: true,
   ui: false,
   logPrefix: "cue",
-  // reloadOnRestart: true,
+  reloadOnRestart: true,
   rewriteRules: rewriteRules
 }, function(e) {
   console.log(' Listening on ' + (https ? 'https' : 'http') + '://127.0.0.1:%d', port);
