@@ -3,27 +3,31 @@ var postcss = require('postcss');
 var safe = require('postcss-safe-parser');
 var sorting = require('postcss-sorting');
 var autoprefixer = require('autoprefixer');
-
+var fs = require('fs');
 var path = require('path');
 var less = require('less');
 
 
 module.exports = function(content, file, conf) {
 
+  if(/\.min\./.test(conf.filename)){
+    return content;
+  }
+
   var _ = fis.util;
+  var documentRoot = fis.project.getProjectPath();
 
   var option = conf.option || {}
 
+  var sourceMap = "", sourceFile = path.join(file.getDeploy() + '.map');
+
   var defaultOptions = {
-    paths: [file.dirname, fis.project.getProjectPath()],
+    paths: [file.dirname],
     sourceMap:{
-      outputSourceFiles: true
+      sourceMapBasepath: file.dirname
     },
     syncImport: true,
-    relativeUrls: true,
-    autoprefixer: {
-      browsers: ['> 1%', 'iOS 7']
-    }
+    relativeUrls: false
   }
 
   option = _.assign(defaultOptions, option);
@@ -34,7 +38,7 @@ module.exports = function(content, file, conf) {
 
   var isLessLike = /\.less$|\.lessm$/.test(conf.filename);
 
-  var sourceMap = {};
+
 
   if (isLessLike) {
 
@@ -52,21 +56,26 @@ module.exports = function(content, file, conf) {
 
   };
 
-
   var postcssPlus = [
     sorting(),
     autoprefixer(option.autoprefixer)
   ];
 
   var cssprocess = postcss(postcssPlus).process(content, {
-    parser: safe
+    parser: safe,
+    from: file.release,
+    map: {
+      prev: sourceMap,
+      inline: false,
+      annotation: path.basename(sourceFile)
+    }
   });
 
   content =  cssprocess.css;
+  sourceMap =  cssprocess.map;
 
-  if(isLessLike){
-    // data:application/json;base64,
-    content = content + '/*# sourceMappingURL=data:application/json;base64,'+ _.base64(sourceMap) +' */';
+  if(!file.isInline){
+    _.write(sourceFile, sourceMap);
   }
 
   return content;

@@ -1,30 +1,30 @@
 {
-  "name": "fis3-parser-css",
-  "version": "1.0.0",
-  "description": "fis3的 css 编译插件 .. 编译 less,css ,自动补全前缀和分号 , 优化排序.. ",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "fis",
-    "cue",
-    "css",
-    "postcss",
-    "autoprefixer",
-    "fis3 parser"
-  ],
-  "author": "jianl",
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jian263994241/fis3-plugin-abc"
-  },
-  "dependencies": {
-    "autoprefixer": "^6.7.3",
-    "less": "^2.7.2",
-    "postcss": "^5.2.13",
-    "postcss-safe-parser": "^2.0.0",
-    "postcss-sorting": "^2.0.1"
-  }
+    "name": "fis3-parser-css",
+    "version": "1.0.1",
+    "description": "fis3的 css 编译插件 .. 编译 less,css ,自动补全前缀和分号 , 优化排序.. ",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "fis",
+        "cue",
+        "css",
+        "postcss",
+        "autoprefixer",
+        "fis3 parser"
+    ],
+    "author": "jianl",
+    "license": "ISC",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jian263994241/fis3-plugin-abc"
+    },
+    "dependencies": {
+        "autoprefixer": "^7.1.1",
+        "less": "^2.7.2",
+        "postcss": "^6.0.2",
+        "postcss-safe-parser": "^3.0.0",
+        "postcss-sorting": "^3.0.0"
+    }
 }
