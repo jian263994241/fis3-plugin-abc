@@ -1,6 +1,6 @@
 {
     "name": "fis3-parser-css",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "fis3的 css 编译插件 .. 编译 less,css ,自动补全前缀和分号 , 优化排序.. ",
     "main": "index.js",
     "scripts": {

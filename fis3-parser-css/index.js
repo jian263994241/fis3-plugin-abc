@@ -24,10 +24,11 @@ module.exports = function(content, file, conf) {
   var defaultOptions = {
     paths: [file.dirname],
     sourceMap:{
-      sourceMapBasepath: file.dirname
+      // sourceMapBasepath: file.dirname,
+      sourceMapRootpath: 'file://'
     },
     syncImport: true,
-    relativeUrls: false
+    // relativeUrls: true
   }
 
   option = _.assign(defaultOptions, option);
@@ -67,6 +68,7 @@ module.exports = function(content, file, conf) {
     map: {
       prev: sourceMap,
       inline: false,
+      // sourcesContent: true,
       annotation: path.basename(sourceFile)
     }
   });
