@@ -4,13 +4,7 @@ cue 的样式模块, 集成 postcss,less,safe-parser,sorting,autoprefixer
 
 ```javascript
 fis.match('**.{less,css}',{
-  parser: fis.plugin('css',{
-    option:{
-      autoprefixer:{
-        browsers: ['> 1%', 'iOS 7']
-      }
-    }
-  })
+  parser: fis.plugin('css')
 })
 
 ```

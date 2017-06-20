@@ -21,17 +21,18 @@ module.exports = function(content, file, conf) {
 
   var sourceMap = "", sourceFile = path.join(file.getDeploy() + '.map');
 
-  var defaultOptions = {
+  var lessOptions = {
     paths: [file.dirname],
+    filename: file.origin,
     sourceMap:{
-      // sourceMapBasepath: file.dirname,
-      sourceMapRootpath: 'file://'
+      sourceMapFileInline: false,
+      outputSourceFiles: true, // output less files in soucemap
+      sourceMapRootpath: "file://"
     },
     syncImport: true,
-    // relativeUrls: true
+    relativeUrls: true
   }
 
-  option = _.assign(defaultOptions, option);
 
   if(!file.isCssLike){
     return fis.log.warn(conf.filename + ' is not css file.');
@@ -43,7 +44,7 @@ module.exports = function(content, file, conf) {
 
   if (isLessLike) {
 
-    less.render(content, option, function(err, result) {
+    less.render(content, lessOptions, function(err, result) {
       if (err) {
         throw err;
       }
@@ -59,16 +60,16 @@ module.exports = function(content, file, conf) {
 
   var postcssPlus = [
     sorting(),
-    autoprefixer(option.autoprefixer)
+    autoprefixer({browsers: ['> 1%', 'iOS 7']})
   ];
 
   var cssprocess = postcss(postcssPlus).process(content, {
     parser: safe,
-    from: file.release,
+    from: file.origin,
     map: {
       prev: sourceMap,
       inline: false,
-      // sourcesContent: true,
+      sourcesContent: true,
       annotation: path.basename(sourceFile)
     }
   });
