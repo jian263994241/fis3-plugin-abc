@@ -19,6 +19,9 @@ var stage0 = require('babel-preset-stage-0');
 
 var collapser = require('bundle-collapser/plugin');
 
+//Externalizes the source map found inside a stream to an external .map file or stream.
+var exorcist = require('exorcist');
+var BufferHelper = require('bufferhelper');
 /*
 
 调用
@@ -58,16 +61,18 @@ module.exports = function(content, file, conf) {
     _partialify = partialify.onlyAllow(['xml', 'csv', 'html', 'svg', 'json', 'tpl']),
     _bID = _.md5(file.origin, 8),
     currentMedia = project.currentMedia(),
-    debug = Boolean(process.env.NODE_ENV === 'development'),
+    fullPaths = Boolean(process.env.NODE_ENV === 'development'),
     cachePath = path.join(project.getCachePath('compile'), 'release-' + currentMedia),
     isDone = false;
 
   var cacheFile = path.join(cachePath, 'browserifyInc' + _bID + '.json');
 
+  var mapfile = path.join(file.getDeploy() + '.map');
+
   var bConfig = {
-    debug: debug,
+    debug: true,
     extensions: ['.js', '.es6', '.jsx'],
-    fullPaths: debug,
+    fullPaths: fullPaths,
     cache: {},
     packageCache: {},
     paths: [path.resolve(__dirname, '../../node_modules'), './node_modules', './'],
@@ -154,12 +159,14 @@ module.exports = function(content, file, conf) {
 
   b.transform(_partialify);
 
-  var buffer = '';
+  // var buffer = '';
+  var bufferHelper = new BufferHelper();
 
   var stream = through2(write, end);
 
   function write(chunk, enc, next) {
-    buffer += chunk.toString();
+    // buffer += chunk.toString();
+    bufferHelper.concat(chunk);
     process.stdout.write('.');
     next();
   }
@@ -169,20 +176,25 @@ module.exports = function(content, file, conf) {
     done();
   }
 
-  b.bundle().on('error', function(err) {
+  b.bundle()
+  .pipe(exorcist(mapfile))
+  .pipe(stream)
+  .on('error', function(err) {
     isDone = true;
     console.log(err.stack ? err.stack : err);
     fis.once('release:end', function() {
       _.del(file.cache.cacheInfo);
     });
-  }).pipe(stream);
+  });
 
   // 使用 deasync 让 browserify 同步输出到 content
   deasync.loopWhile(function() {
     return !isDone;
   });
 
-  content = derequire(buffer, [{
+  content = bufferHelper.toBuffer().toString();
+
+  content = derequire(content, [{
     from: 'require',
     to: '_dereq_'
   }, {

@@ -1,6 +1,6 @@
 {
   "name": "fis3-parser-browserify",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "fis3 browserify 插件",
   "main": "index.js",
   "scripts": {
@@ -29,12 +29,14 @@
     "browserify": "^14.3.0",
     "browserify-banner": "^1.0.3",
     "browserify-incremental": "^3.1.1",
+    "bufferhelper": "^0.2.1",
     "cssnano": "^3.10.0",
     "deasync": "^0.1.7",
     "derequire": "^2.0.6",
     "eslint-plugin-babel": "^3.3.0",
     "eslint-plugin-react": "^6.7.1",
     "eslintify": "^3.1.0",
+    "exorcist": "^0.4.0",
     "less": "^2.7.1",
     "partialify": "^3.1.6",
     "postcss": "^5.0.21",
