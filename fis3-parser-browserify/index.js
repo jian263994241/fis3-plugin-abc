@@ -20,7 +20,7 @@ var stage0 = require('babel-preset-stage-0');
 var collapser = require('bundle-collapser/plugin');
 
 //Externalizes the source map found inside a stream to an external .map file or stream.
-var exorcist = require('exorcist');
+var mold = require('mold-source-map');
 var BufferHelper = require('bufferhelper');
 /*
 
@@ -66,9 +66,6 @@ module.exports = function(content, file, conf) {
     isDone = false;
 
   var cacheFile = path.join(cachePath, file.origin + _bID + '.json');
-
-  var mapfile = fis.file.wrap(file.origin + '.map');
-
 
   var bConfig = {
     debug: true,
@@ -160,13 +157,11 @@ module.exports = function(content, file, conf) {
 
   b.transform(_partialify);
 
-  // var buffer = '';
   var bufferHelper = new BufferHelper();
 
   var stream = through2(write, end);
 
   function write(chunk, enc, next) {
-    // buffer += chunk.toString();
     bufferHelper.concat(chunk);
     process.stdout.write('.');
     next();
@@ -177,8 +172,15 @@ module.exports = function(content, file, conf) {
     done();
   }
 
+  function mapFileUrlComment(sourcemap, cb){
+    var mapfile = fis.file.wrap(file.rest + '.js.map');
+    mapfile.setContent(sourcemap.toJSON(2));
+    mapfile.save()
+    cb('//@ sourceMappingURL=' + mapfile.basename);
+  }
+
   b.bundle()
-  .pipe(exorcist(mapfile.origin))
+  .pipe(mold.transform(mapFileUrlComment))
   .pipe(stream)
   .on('error', function(err) {
     isDone = true;
@@ -194,6 +196,7 @@ module.exports = function(content, file, conf) {
   });
 
   content = bufferHelper.toBuffer().toString();
+
 
   content = derequire(content, [{
     from: 'require',

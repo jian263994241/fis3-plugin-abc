@@ -88,53 +88,60 @@ module.exports = function(file, transformOptions) {
       return /[?&]__inline(?:[=&'"]|$)/.test(url);
     }
 
-    function img(cssContent){
-      var reg = /(\/\*[\s\S]*?(?:\*\/|$))|(?:@import\s+)?\burl\s*\(\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|[^)}\s]+)\s*\)(\s*;?)|\bsrc\s*=\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|[^\s}]+)/g;
-      var _ = fis.util;
-      var fileW = fis.file(file);
-      cssContent = cssContent.replace(reg, function(m, comment, url, last, filter){
-        // console.log(m,url,last);
-        if (m.indexOf('@') === 0) {
-            return m;
-        }
-        if (url) {
-          var quote = _.stringQuote(url);
+    // function img(cssContent){
+    //   var reg = /(\/\*[\s\S]*?(?:\*\/|$))|(?:@import\s+)?\burl\s*\(\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|[^)}\s]+)\s*\)(\s*;?)|\bsrc\s*=\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|[^\s}]+)/g;
+    //   var _ = fis.util;
+    //   var fileW = fis.file(file);
+    //   cssContent = cssContent.replace(reg, function(m, comment, url, last, filter){
+    //     // console.log(m,url,last);
+    //     if (m.indexOf('@') === 0) {
+    //         return m;
+    //     }
+    //     if (url) {
+    //       var quote = _.stringQuote(url);
+    //
+    //       if(/^(data:)|(https:\/\/)|(http:\/\/)/.test(quote.rest)){
+    //         return m;
+    //       }
+    //
+    //       var info = _.query(quote.rest);
+    //
+    //       if(path.isAbsolute(info.rest)){
+    //         info = fis.uri(info.rest);
+    //       }else{
+    //         info = fis.project.lookup(info.rest, file);
+    //       }
+    //
+    //       var _file = info.file;
+    //
+    //       if(!_file){
+    //         fis.log.warn(file,':', url , 'is not exist');
+    //       }else{
+    //         _file.getContent();
+    //
+    //         if(isInline(url)){
+    //           m = 'url("'+ _file.getBase64() +'")';
+    //         }else{
+    //           m = 'url('+ _file.domain + _file.getHashRelease() +')';
+    //         }
+    //       }
+    //     }
+    //
+    //     return m;
+    //   });
+    //   // console.log(cssContent);
+    //   return cssContent;
+    // }
 
-          if(/^(data:)|(https:\/\/)|(http:\/\/)/.test(quote.rest)){
-            return m;
-          }
-
-          var info = _.query(quote.rest);
-
-          if(path.isAbsolute(info.rest)){
-            info = fis.uri(info.rest);
-          }else{
-            info = fis.project.lookup(info.rest, file);
-          }
-
-          var _file = info.file;
-
-          if(!_file){
-            fis.log.warn(file,':', url , 'is not exist');
-          }else{
-            _file.getContent();
-
-            if(isInline(url)){
-              m = 'url("'+ _file.getBase64() +'")';
-            }else{
-              m = 'url('+ _file.domain + _file.getHashRelease() +')';
-            }
-          }
-        }
-
-        return m;
-      });
-      // console.log(cssContent);
-      return cssContent;
+    function fisRes(content , filepath){
+      var cssfile = fis.file.wrap(filepath);
+      cssfile.setContent(content);
+      fis.compile.process(cssfile);
+      return cssfile.getContent();
     }
 
     function outputHandler(output){
-      output.css = img(output.css);
+      output.css = fisRes(output.css, file);
       var compiled = JSON.stringify(
         output.css +
         (curTransformOptions.appendLessSourceUrl ?

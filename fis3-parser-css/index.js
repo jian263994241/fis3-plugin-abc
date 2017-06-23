@@ -41,8 +41,6 @@ module.exports = function(content, file, conf) {
 
   var isLessLike = /\.less$|\.lessm$/.test(conf.filename);
 
-
-
   if (isLessLike) {
 
     less.render(content, lessOptions, function(err, result) {
@@ -80,6 +78,7 @@ module.exports = function(content, file, conf) {
 
   if(!file.isInline){
     mapfile.setContent(sourceMap);
+    mapfile.save();
   }
 
   return content;
