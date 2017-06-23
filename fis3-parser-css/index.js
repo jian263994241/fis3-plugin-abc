@@ -19,7 +19,8 @@ module.exports = function(content, file, conf) {
 
   var option = conf.option || {}
 
-  var sourceMap = "", sourceFile = path.join(file.getDeploy() + '.map');
+  var sourceMap = "",
+    mapfile = fis.file.wrap(file.rest + '.css.map');
 
   var lessOptions = {
     paths: [file.dirname],
@@ -70,7 +71,7 @@ module.exports = function(content, file, conf) {
       prev: sourceMap,
       inline: false,
       sourcesContent: true,
-      annotation: path.basename(sourceFile)
+      annotation: mapfile.basename
     }
   });
 
@@ -78,7 +79,7 @@ module.exports = function(content, file, conf) {
   sourceMap =  cssprocess.map;
 
   if(!file.isInline){
-    _.write(sourceFile, sourceMap);
+    mapfile.setContent(sourceMap);
   }
 
   return content;

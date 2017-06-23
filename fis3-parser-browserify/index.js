@@ -65,9 +65,9 @@ module.exports = function(content, file, conf) {
     cachePath = path.join(project.getCachePath('compile'), 'release-' + currentMedia),
     isDone = false;
 
-  var cacheFile = path.join(cachePath, file.rest + _bID + '.json');
+  var cacheFile = path.join(cachePath, file.origin + _bID + '.json');
 
-  var mapfile = fis.file.wrap(file.rest + '.map');
+  var mapfile = fis.file.wrap(file.origin + '.map');
 
 
   var bConfig = {
