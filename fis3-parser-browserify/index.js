@@ -65,9 +65,10 @@ module.exports = function(content, file, conf) {
     cachePath = path.join(project.getCachePath('compile'), 'release-' + currentMedia),
     isDone = false;
 
-  var cacheFile = path.join(cachePath, 'browserifyInc' + _bID + '.json');
+  var cacheFile = path.join(cachePath, file.rest + _bID + '.json');
 
-  var mapfile = path.join(file.getDeploy() + '.map');
+  var mapfile = fis.file.wrap(file.rest + '.map');
+
 
   var bConfig = {
     debug: true,
@@ -177,7 +178,7 @@ module.exports = function(content, file, conf) {
   }
 
   b.bundle()
-  .pipe(exorcist(mapfile))
+  .pipe(exorcist(mapfile.origin))
   .pipe(stream)
   .on('error', function(err) {
     isDone = true;
