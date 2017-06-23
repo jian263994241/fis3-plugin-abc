@@ -20,7 +20,7 @@ module.exports = function(content, file, conf) {
   var option = conf.option || {}
 
   var sourceMap = "",
-    mapfile = fis.file.wrap(file.rest + '.css.map');
+    mapfile = fis.file(documentRoot, file.getHashRelease() + '.map');
 
   var lessOptions = {
     paths: [file.dirname],
@@ -76,7 +76,7 @@ module.exports = function(content, file, conf) {
   content =  cssprocess.css;
   sourceMap =  cssprocess.map;
 
-  if(!file.isInline){
+  if(!file.isInline && file.useMap){
     mapfile.setContent(sourceMap);
     mapfile.save();
   }

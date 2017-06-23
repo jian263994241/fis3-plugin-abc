@@ -173,7 +173,11 @@ module.exports = function(content, file, conf) {
   }
 
   function mapFileUrlComment(sourcemap, cb){
-    var mapfile = fis.file.wrap(file.rest + '.js.map');
+
+    if(!file.useMap) return cb();
+
+    var documentRoot = fis.project.getProjectPath();
+    var mapfile = fis.file.wrap(path.join(documentRoot, file.getHashRelease() + '.map'));
     mapfile.setContent(sourcemap.toJSON(2));
     mapfile.save()
     cb('//@ sourceMappingURL=' + mapfile.basename);
@@ -196,7 +200,6 @@ module.exports = function(content, file, conf) {
   });
 
   content = bufferHelper.toBuffer().toString();
-
 
   content = derequire(content, [{
     from: 'require',
