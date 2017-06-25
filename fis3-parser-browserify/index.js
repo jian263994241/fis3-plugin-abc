@@ -114,9 +114,7 @@ module.exports = function(content, file, conf) {
 
   b.pipeline.get('deps')
     .on('data', function(obj) {
-      if(!/node_modules/.test(obj.file) && /^\/.+/.test(obj.file)){
-        file.cache.addDeps(obj.file);
-      }
+      file.cache.addDeps(obj.file);
     });
 
   //编译css
