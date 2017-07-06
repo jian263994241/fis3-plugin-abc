@@ -20,7 +20,7 @@ module.exports = function(content, file, conf) {
   var option = conf.option || {}
 
   var sourceMap = "",
-    mapfile = fis.file(documentRoot, file.getHashRelease() + '.map');
+    mapfile = fis.file(documentRoot, file.release + '.map');
 
   var lessOptions = {
     paths: [file.dirname],

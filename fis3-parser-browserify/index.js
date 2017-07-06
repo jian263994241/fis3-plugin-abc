@@ -177,7 +177,7 @@ module.exports = function(content, file, conf) {
     if(!file.useMap) return cb();
 
     var documentRoot = fis.project.getProjectPath();
-    var mapfile = fis.file.wrap(path.join(documentRoot, file.getHashRelease() + '.map'));
+    var mapfile = fis.file.wrap(path.join(documentRoot, file.release + '.map'));
     mapfile.setContent(sourcemap.toJSON(2));
     mapfile.save()
     cb('//@ sourceMappingURL=' + mapfile.basename);
