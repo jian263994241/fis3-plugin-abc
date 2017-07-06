@@ -52,7 +52,7 @@ module.exports = {
     "no-console": "off",
     "no-undef": ["warn"],
     "no-unused-vars": "off",
-    "linebreak-style": ["error", "unix"],
+    "linebreak-style": "off",
     "quotes": "off",
     "semi": "off"
   }
