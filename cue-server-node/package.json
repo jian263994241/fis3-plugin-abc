@@ -6,7 +6,7 @@
         "url": "https://github.com/fex-team/fis3-server-node/issues"
     },
     "dependencies": {
-        "browser-sync": "^2.18.7",
+        "browser-sync": "^2.18.12",
         "compression": "^1.6.2",
         "dev-ip": "^1.0.1",
         "eruda": "^1.2.3",
@@ -38,5 +38,5 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "version": "0.1.22"
+    "version": "0.1.23"
 }

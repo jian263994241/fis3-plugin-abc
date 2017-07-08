@@ -85,10 +85,6 @@ proxyLinks.forEach(function(link, index) {
 //gzip
 middleware.push(compress());
 
-middleware.push({
-  route: 'browser-sync',
-
-})
 
 // rewriteRules.push({
 //   match: /127\.0\.0\.1/g,
@@ -118,16 +114,6 @@ rewriteRules.push({
   }
 });
 
-var css = DOCUMENT_ROOT + '/**.css';
-var html = DOCUMENT_ROOT + '/**.html';
-var js = DOCUMENT_ROOT + '/**.js';
-
-server.watch([html, css, js], function(event, file) {
-  if (event === "change" || event === "add") {
-    server.reload(file);
-  }
-});
-
 
 server.init({
   server: {
@@ -138,6 +124,21 @@ server.init({
     directory: true,
     middleware: middleware
   },
+  files: [
+    {
+      match: [
+        path.join(DOCUMENT_ROOT, '/**/*.html'),
+        path.join(DOCUMENT_ROOT, '/**/*.js'),
+        path.join(DOCUMENT_ROOT, '/**/*.css')
+      ],
+      fn: function (event, file) {
+        console.log(event);
+        if (event === "change" || event === "add") {
+          server.reload(file);
+        }
+      },
+    }
+  ],
   port: port,
   open: false,
   notify: false,
