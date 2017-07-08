@@ -65,7 +65,7 @@ module.exports = function(content, file, conf) {
     cachePath = path.join(project.getCachePath('compile'), 'release-' + currentMedia),
     isDone = false;
 
-  var cacheFile = path.join(cachePath, file.origin + _bID + '.json');
+  var cacheFile = path.join(cachePath, file.basename + _bID + '.json');
 
   var bConfig = {
     debug: true,
