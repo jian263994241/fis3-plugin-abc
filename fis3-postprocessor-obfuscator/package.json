@@ -1,0 +1,14 @@
+{
+  "name": "fis3-postprocessor-obfuscator",
+  "version": "0.9.4",
+  "description": "fis3-deploy-replace",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "javascript-obfuscator": "^0.9.4"
+  }
+}
