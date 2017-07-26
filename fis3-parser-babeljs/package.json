@@ -1,0 +1,32 @@
+{
+  "name": "fis3-parser-babeljs",
+  "version": "1.0.0",
+  "description": "transform es6 to es5 on babel stage0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jian263994241/fis3-plugin-abc.git"
+  },
+  "keywords": [
+    "fis3",
+    "cue"
+  ],
+  "author": "jx.lee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jian263994241/fis3-plugin-abc/issues"
+  },
+  "homepage": "https://github.com/jian263994241/fis3-plugin-abc#readme",
+  "dependencies": {
+    "babel-core": "^6.25.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-object-assign": "^6.22.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1"
+  }
+}
