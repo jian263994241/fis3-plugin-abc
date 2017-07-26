@@ -66,7 +66,9 @@ module.exports = function(file, transformOptions) {
     var postcssPlus = [
       sorting(),
       autoprefixer({ browsers: ['> 1%', 'iOS 7'] }),
-      cssnano()
+      cssnano({
+        zindex: false
+      })
     ];
 
     var cssname = {};
