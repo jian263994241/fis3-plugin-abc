@@ -5,6 +5,12 @@ var JavaScriptObfuscator = require('javascript-obfuscator');
 
 module.exports = function(content, file, settings) {
 
+  if(typeof file.guard === 'undefined'){
+    file.guard = true;
+  }
+
+  if(!file.guard) return content;
+
   var opt = Object.assign({
         compact: true,
         controlFlowFlattening: true,

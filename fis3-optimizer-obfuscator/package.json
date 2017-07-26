@@ -1,6 +1,6 @@
 {
   "name": "fis3-postprocessor-obfuscator",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "fis3-deploy-replace",
   "main": "index.js",
   "scripts": {
