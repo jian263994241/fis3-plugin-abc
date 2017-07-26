@@ -23,7 +23,7 @@ module.exports = function(content, file, conf) {
     ],
   }
 
-  var result = babel.transform(code, options);
+  var result = babel.transform(content, options);
 
   file.sourceMap = result.map;
 
