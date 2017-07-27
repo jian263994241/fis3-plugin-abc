@@ -1,6 +1,6 @@
 {
     "name": "fis3-parser-css",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "fis3的 css 编译插件 .. 编译 less,css ,自动补全前缀和分号 , 优化排序.. ",
     "main": "index.js",
     "scripts": {
@@ -22,9 +22,12 @@
     },
     "dependencies": {
         "autoprefixer": "^7.1.1",
+        "cssnano": "^3.10.0",
+        "deasync": "^0.1.10",
         "less": "^2.7.2",
         "postcss": "^6.0.2",
         "postcss-safe-parser": "^3.0.0",
+        "postcss-modules": "^0.8.0",
         "postcss-sorting": "^3.0.0"
     }
 }

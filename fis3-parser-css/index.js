@@ -1,12 +1,14 @@
-
+var fs = require('fs');
+var path = require('path');
+var less = require('less');
+var tpl = fs.readFileSync(path.join(__dirname, './template.tpl'), 'utf8');
 var postcss = require('postcss');
 var safe = require('postcss-safe-parser');
 var sorting = require('postcss-sorting');
 var autoprefixer = require('autoprefixer');
-var fs = require('fs');
-var path = require('path');
-var less = require('less');
-
+var cssnano = require('cssnano');
+var deasync = require('deasync');
+var modules = require('postcss-modules');
 
 module.exports = function(content, file, conf) {
 
@@ -34,10 +36,13 @@ module.exports = function(content, file, conf) {
     relativeUrls: true
   }
 
+  var isDone = false;
 
-  if(!file.isCssLike){
-    return fis.log.warn(conf.filename + ' is not css file.');
-  };
+  var cssname = {};
+
+  // if(!file.isCssLike){
+  //   return fis.log.warn(conf.filename + ' is not css file.');
+  // };
 
   var isLessLike = /\.less$|\.lessm$/.test(conf.filename);
 
@@ -59,26 +64,56 @@ module.exports = function(content, file, conf) {
 
   var postcssPlus = [
     sorting(),
-    autoprefixer({browsers: ['> 1%', 'iOS 7']})
+    autoprefixer({browsers: ['> 1%', 'iOS 7']}),
   ];
 
-  var cssprocess = postcss(postcssPlus).process(content, {
+  if(file.rExt === '.js'){
+    postcssPlus = postcssPlus.concat([
+      cssnano({zIndex: false}),
+      modules({
+        getJSON: function(cssFileName, json) {
+          cssname = json;
+        }
+      })
+    ]);
+  }
+
+  postcss(postcssPlus).process(content, {
     parser: safe,
     from: file.origin,
+    annotation: false,
     map: {
       prev: sourceMap,
       inline: false,
       sourcesContent: true,
       annotation: mapfile.basename
     }
+  }).then(function(cssprocess){
+    isDone = true;
+    content =  cssprocess.css;
+    sourceMap =  cssprocess.map;
+
+    if(!file.isInline && file.useMap){
+      mapfile.setContent(sourceMap);
+      mapfile.save();
+    }
+  }).catch(function(){
+    isDone = true;
   });
 
-  content =  cssprocess.css;
-  sourceMap =  cssprocess.map;
+  deasync.loopWhile(function() {
+    return !isDone;
+  });
 
-  if(!file.isInline && file.useMap){
-    mapfile.setContent(sourceMap);
-    mapfile.save();
+  if(file.rExt === '.js'){
+    content = tpl.replace(/%compiled|%cssname/ig, function(matched){
+      if(matched === '%compiled'){
+        return JSON.stringify(content);
+      }
+      if(matched === '%cssname'){
+        return JSON.stringify(cssname);
+      }
+    })
   }
 
   return content;
