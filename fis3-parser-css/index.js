@@ -69,7 +69,7 @@ module.exports = function(content, file, conf) {
 
   if(file.rExt === '.js'){
     postcssPlus = postcssPlus.concat([
-      cssnano({zIndex: false}),
+      cssnano({zindex: false}),
       modules({
         getJSON: function(cssFileName, json) {
           cssname = json;
