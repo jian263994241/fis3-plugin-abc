@@ -33,11 +33,11 @@ module.exports = function(content, file, conf) {
   var requires = options.requires; // array({path, expose})
   var insertGlobalVars = options.insertGlobalVars || {}; // {var: (file, basedir)=>var}
   var externalRequireName = options.externalRequireName || '$require';
+  var fullPaths = options.fullPaths;
 
   var _ = fis.util;
   var project = fis.project;
   var currentMedia = project.currentMedia();
-  var debug = (process.env.NODE_ENV === 'development');
   var isDone = false;
 
   var id = _.md5(file.origin, 8);
@@ -46,10 +46,10 @@ module.exports = function(content, file, conf) {
 
   var b = browserify({
     cache: {},
-    debug: debug,
+    debug: true,
     externalRequireName: externalRequireName,
     extensions: ['.js', '.es6', '.jsx'],
-    fullPaths: debug,
+    fullPaths: fullPaths || (currentMedia === 'dev'),
     insertGlobalVars: insertGlobalVars,
     packageCache: {},
     paths: [
