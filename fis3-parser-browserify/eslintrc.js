@@ -5,6 +5,7 @@ var globals = [
   "arguments",
   "__filename",
   "__dirname",
+  "__getConf",
   "__uri",
   "__inline",
   "__lazyload",
