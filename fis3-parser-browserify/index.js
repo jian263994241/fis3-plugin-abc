@@ -22,81 +22,56 @@ var collapser = require('bundle-collapser/plugin');
 //Externalizes the source map found inside a stream to an external .map file or stream.
 var mold = require('mold-source-map');
 var BufferHelper = require('bufferhelper');
-/*
-
-调用
-常量 B
-fis.parser通道
-
-option
-{
-externals (String||array)  外部文件,不打包
-shims  (object)兼容 cnd 引入 变量
-entry  (booleen)入口 默认 true
-
-requires (array)打包依赖
-}
-
-*/
 
 module.exports = function(content, file, conf) {
 
-  var option = conf.option || {},
-    defaultOpt = {
-      shims: {},
-      externals: '', //str or array
-      expose: null,
-      requires: null,
-      umd: undefined,
-      externalRequireName: 'require'
-    },
-    _ = fis.util,
-    project = fis.project;
+  var options = conf.option || conf;
+  var shims = options.shims || {}; // object
+  var externals = options.externals || '';  //array || string
+  var standalone = options.standalone || options.umd;  // string
+  var expose = options.expose; // string
+  var requires = options.requires; // array({path, expose})
+  var insertGlobalVars = options.insertGlobalVars || {}; // {var: (file, basedir)=>var}
+  var externalRequireName = options.externalRequireName || '$require';
 
+  var _ = fis.util;
+  var project = fis.project;
+  var currentMedia = project.currentMedia();
+  var debug = (process.env.NODE_ENV === 'development');
+  var isDone = false;
 
-  option = Object.assign(defaultOpt, option || {});
+  var id = _.md5(file.origin, 8);
+  var cachePath = path.join(project.getCachePath('compile'), 'release-' + currentMedia);
+  var cacheFile = path.join(cachePath, file.basename + id + '.json');
 
-
-  var _shimixify = shimixify.configure({ shims: option.shims }),
-    _partialify = partialify.onlyAllow(['xml', 'csv', 'html', 'svg', 'json', 'tpl']),
-    _bID = _.md5(file.origin, 8),
-    currentMedia = project.currentMedia(),
-    fullPaths = Boolean(process.env.NODE_ENV === 'development'),
-    cachePath = path.join(project.getCachePath('compile'), 'release-' + currentMedia),
-    isDone = false;
-
-  var cacheFile = path.join(cachePath, file.basename + _bID + '.json');
-
-  var bConfig = {
-    debug: true,
-    extensions: ['.js', '.es6', '.jsx'],
-    fullPaths: fullPaths,
+  var b = browserify({
     cache: {},
+    debug: debug,
+    externalRequireName: externalRequireName,
+    extensions: ['.js', '.es6', '.jsx'],
+    fullPaths: debug,
+    insertGlobalVars: insertGlobalVars,
     packageCache: {},
-    paths: [path.resolve(__dirname, '../../node_modules'), './node_modules', './'],
-    externalRequireName: option.externalRequireName
-  };
-
-  if (option.umd) {
-    bConfig.standalone = option.umd;
-  }
-
-  var b = browserify(bConfig);
+    paths: [
+      path.resolve(__dirname, '../../node_modules'),
+      './node_modules',
+      './'
+    ],
+    standalone: standalone
+  });
 
   browserifyInc(b, {
     cacheFile: cacheFile
   });
 
-  if (!option.expose) {
+  if (!expose) {
     b.add(file.realpath);
   } else {
-    b.require(file.realpath, {
-      expose: option.expose
-    });
+    b.require(file.realpath, { expose: expose });
   }
 
-  if (option.requires) {
-    option.requires.forEach(function(r) {
+  if (requires) {
+    requires.forEach(function(r) {
       if (typeof r === 'string') {
         b.require(r);
       } else {
@@ -110,21 +85,16 @@ module.exports = function(content, file, conf) {
   b.plugin(collapser);
   //增加banner
 
-  b.external(option.externals);
+  b.external(externals);
 
-  b.pipeline.get('deps')
-    .on('data', function(obj) {
-      file.cache.addDeps(obj.file);
-    });
+  b.pipeline.get('deps').on('data', function(obj) {
+    file.cache.addDeps(obj.file);
+  });
 
   //编译css
-  b.transform(cssy, {
-    global: true
-  });
+  b.transform(cssy);
 
-  b.transform(_shimixify, {
-    global: true
-  });
+  b.transform(shimixify.configure({ shims: shims }), { global: true });
 
   b.transform(eslintify, {
     baseConfig: require('./eslintrc'),
@@ -153,7 +123,7 @@ module.exports = function(content, file, conf) {
   });
 
 
-  b.transform(_partialify);
+  b.transform(partialify.onlyAllow(['xml', 'csv', 'html', 'svg', 'json', 'tpl']));
 
   var bufferHelper = new BufferHelper();
 
