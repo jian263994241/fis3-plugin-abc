@@ -6,6 +6,20 @@ var stage0 = require('babel-preset-stage-0');
 module.exports = function(content, file, conf) {
   if(!file.isJsLike) return content;
 
+  var runtime = typeof conf.runtime === 'undefined' ? true : conf.runtime;
+
+  var plugins = [
+    require.resolve('babel-plugin-transform-decorators-legacy'),
+    require.resolve('babel-plugin-transform-object-assign')
+  ];
+
+  if(runtime){
+    plugins.push(
+      require.resolve('babel-plugin-transform-runtime')
+    );
+  }
+
+
   var options = {
     presets: [
       react,
@@ -16,11 +30,7 @@ module.exports = function(content, file, conf) {
       }],
       stage0
     ],
-    plugins: [
-      require.resolve('babel-plugin-transform-decorators-legacy'),
-      require.resolve('babel-plugin-transform-runtime'),
-      require.resolve('babel-plugin-transform-object-assign')
-    ],
+    plugins: plugins
   }
 
   var result = babel.transform(content, options);
