@@ -53,7 +53,7 @@ module.exports = function(content, file, settings) {
       deadCodeInjection: false,
       debugProtection: false,
       debugProtectionInterval: false,
-      disableConsoleOutput: true,
+      disableConsoleOutput: false,
       mangle: true,
       rotateStringArray: true,
       selfDefending: true,
@@ -69,6 +69,7 @@ module.exports = function(content, file, settings) {
   if(!file.guard) return content;
 
   var opt = preset[level];
+
 
   var ObfuscationResult = JavaScriptObfuscator.obfuscate(file.getContent(), opt);
 
