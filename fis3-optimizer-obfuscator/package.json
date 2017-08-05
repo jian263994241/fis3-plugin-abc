@@ -1,6 +1,6 @@
 {
   "name": "fis3-optimizer-obfuscator",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "fis3-deploy-replace",
   "main": "index.js",
   "scripts": {
