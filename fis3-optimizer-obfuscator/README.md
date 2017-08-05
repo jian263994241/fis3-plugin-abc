@@ -5,7 +5,7 @@ javascript-obfuscator
 
 ```js
 optimizer: fis.plugin('obfuscator', {
-  option: {...}
+  type: 'medium'
 })
 
 ``
