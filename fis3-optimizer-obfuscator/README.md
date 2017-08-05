@@ -4,7 +4,7 @@ javascript-obfuscator
 
 
 ```js
-postprocessor: fis.plugin('obfuscator', {
+optimizer: fis.plugin('obfuscator', {
   option: {...}
 })
 
