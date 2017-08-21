@@ -10,7 +10,10 @@ module.exports = function(content, file, conf) {
 
   var plugins = [
     require.resolve('babel-plugin-transform-decorators-legacy'),
-    require.resolve('babel-plugin-transform-object-assign')
+    require.resolve('babel-plugin-transform-object-assign'),
+    [require.resolve('babel-plugin-styled-components'), {
+      displayName: false
+    }]
   ];
 
   if(runtime){
