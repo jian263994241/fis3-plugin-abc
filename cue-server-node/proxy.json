@@ -19,5 +19,8 @@
     }, {
         "host": "https://ebd.99bill.com",
         "api": "/mobile-website"
+    },{
+      "host": "https://rip.99bill.com",
+      "api": "/rip-website"
     }]
 }
