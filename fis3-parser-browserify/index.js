@@ -117,7 +117,10 @@ module.exports = function(content, file, conf) {
     plugins: [
       require.resolve('babel-plugin-transform-decorators-legacy'),
       require.resolve('babel-plugin-transform-runtime'),
-      require.resolve('babel-plugin-transform-object-assign')
+      require.resolve('babel-plugin-transform-object-assign'),
+      [require.resolve('babel-plugin-styled-components'), {
+        displayName: false
+      }]
     ],
     extensions: ['.es6', '.jsx', '.js']
   });
