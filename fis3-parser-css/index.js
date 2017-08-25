@@ -94,6 +94,9 @@ module.exports = function(content, file, conf) {
     sourceMap =  cssprocess.map;
 
     if(!file.isInline && file.useMap){
+      if(file.soucemaps){
+        return file.soucemaps.push(sourceMap);
+      }
       mapfile.setContent(sourceMap);
       mapfile.save();
     }
