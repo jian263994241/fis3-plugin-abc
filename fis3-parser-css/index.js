@@ -86,7 +86,7 @@ module.exports = function(content, file, conf) {
       prev: sourceMap,
       inline: false,
       sourcesContent: true,
-      // annotation: mapfile.basename
+      annotation: file.sourcemaps ? null:mapfile.basename
     }
   }).then(function(cssprocess){
     isDone = true;
