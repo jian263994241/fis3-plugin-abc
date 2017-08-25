@@ -86,7 +86,7 @@ module.exports = function(content, file, conf) {
       prev: sourceMap,
       inline: false,
       sourcesContent: true,
-      annotation: mapfile.basename
+      // annotation: mapfile.basename
     }
   }).then(function(cssprocess){
     isDone = true;
@@ -94,8 +94,8 @@ module.exports = function(content, file, conf) {
     sourceMap =  cssprocess.map;
 
     if(!file.isInline && file.useMap){
-      if(file.soucemaps){
-        return file.soucemaps.push(sourceMap);
+      if(file.sourcemaps){
+        return file.sourcemaps.push(sourceMap);
       }
       mapfile.setContent(sourceMap);
       mapfile.save();
