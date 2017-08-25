@@ -145,14 +145,21 @@ module.exports = function(content, file, conf) {
 
   function mapFileUrlComment(sourcemap, cb){
 
-    if(!file.useMap) return cb();
+  if(!file.useMap) return cb();
 
-    var documentRoot = fis.project.getProjectPath();
-    var mapfile = fis.file.wrap(path.join(documentRoot, file.release + '.map'));
-    mapfile.setContent(sourcemap.toJSON(2));
-    mapfile.save()
-    cb('//@ sourceMappingURL=' + mapfile.basename);
+  if(file.sourcemaps){
+    file.sourcemaps.push(sourcemap.toJSON(2));
+    cb();
+    return ;
   }
+
+  var documentRoot = fis.project.getProjectPath();
+  var mapfile = fis.file.wrap(path.join(documentRoot, file.release + '.map'));
+  mapfile.setContent(sourcemap.toJSON(2));
+  mapfile.save()
+  cb('//@ sourceMappingURL=' + mapfile.basename);
+}
+
 
   b.bundle()
   .pipe(mold.transform(mapFileUrlComment))
