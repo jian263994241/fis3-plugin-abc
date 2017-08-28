@@ -149,7 +149,7 @@ module.exports = function(content, file, conf) {
 
   if(file.sourcemaps){
     file.sourcemaps.push(sourcemap.toJSON(2));
-    cb();
+    cb('');
     return ;
   }
 
