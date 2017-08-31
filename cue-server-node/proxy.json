@@ -7,6 +7,9 @@
     }, {
         "host": "https://ebd.99bill.com",
         "api": "/loan-website"
+    },{
+        "host": "https://ebd.99bill.com",
+        "api": "/vas-card-api"
     }, {
         "host": "https://jr.99bill.com",
         "api": "/fpd-sale"
