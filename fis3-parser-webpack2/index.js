@@ -32,7 +32,7 @@ module.exports = function(content, file, conf) {
       rules: [
         {
           test: /\.(js|jsx|es6)$/,
-          // exclude: /(node_modules|bower_components)/,
+          exclude: /(node_modules|bower_components)/,
           enforce: 'pre',
           use: [{
             loader: 'babel-loader',
