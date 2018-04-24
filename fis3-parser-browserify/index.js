@@ -57,6 +57,8 @@ module.exports = function(content, file, conf) {
       './node_modules',
       './'
     ],
+    transform: options.transform,
+    ignoreTransform: options.ignoreTransform,
     standalone: standalone
   });
 
@@ -83,7 +85,6 @@ module.exports = function(content, file, conf) {
   }
   //修改id减少包体积
   b.plugin(collapser);
-  //增加banner
 
   b.external(externals);
 
@@ -91,10 +92,6 @@ module.exports = function(content, file, conf) {
     file.cache.addDeps(obj.file);
   });
 
-  //编译css
-  b.transform(cssy);
-
-  b.transform(shimixify.configure({ shims: shims }), { global: true });
 
   b.transform(eslintify, {
     baseConfig: require('./eslintrc'),
@@ -103,28 +100,43 @@ module.exports = function(content, file, conf) {
     useEslintrc: false
   });
 
+  
   // 编译 es6 &&  react
   b.transform(babelify, {
     presets: [
-      react,
       [env, {
         targets: {
           browsers: ["last 2 versions", "safari >= 7"]
-        }
+        },
+        useBuiltIns: true,
+        include: [
+          'transform-es2015-arrow-functions', 
+          'es6.map', 
+          'es6.object.assign', 
+          'es6.array.find', 
+          'es6.array.find-index', 
+          'es7.array.includes'
+        ],
       }],
-      stage0
+      stage0,
+      react
     ],
+    babelrc: false,
     plugins: [
       require.resolve('babel-plugin-transform-decorators-legacy'),
       require.resolve('babel-plugin-transform-runtime'),
-      require.resolve('babel-plugin-transform-object-assign'),
-      [require.resolve('babel-plugin-styled-components'), {
-        displayName: false
-      }]
+      [require.resolve('babel-plugin-styled-components'), { displayName: false }]
     ],
-    extensions: ['.es6', '.jsx', '.js']
+    extensions: ['.es6', '.jsx', '.js'],
+    global: true ,
+    ignore: /\/node_modules\// ,
+    only: options.babelOnly
   });
-
+ 
+  //编译css
+  b.transform(cssy, { global: true });
+  
+  b.transform(shimixify.configure({ shims: shims }), { global: true });
 
   b.transform(partialify.onlyAllow(['xml', 'csv', 'html', 'svg', 'json', 'tpl']));
 
@@ -145,21 +157,20 @@ module.exports = function(content, file, conf) {
 
   function mapFileUrlComment(sourcemap, cb){
 
-  if(!file.useMap) return cb();
+    if(!file.useMap) return cb();
 
-  if(file.sourcemaps){
-    file.sourcemaps.push(sourcemap.toJSON(2));
-    cb('');
-    return ;
+    if(file.sourcemaps){
+      file.sourcemaps.push(sourcemap.toJSON(2));
+      cb('');
+      return ;
+    }
+
+    var documentRoot = fis.project.getProjectPath();
+    var mapfile = fis.file.wrap(path.join(documentRoot, file.release + '.map'));
+    mapfile.setContent(sourcemap.toJSON(2));
+    mapfile.save()
+    cb('//@ sourceMappingURL=' + mapfile.basename);
   }
-
-  var documentRoot = fis.project.getProjectPath();
-  var mapfile = fis.file.wrap(path.join(documentRoot, file.release + '.map'));
-  mapfile.setContent(sourcemap.toJSON(2));
-  mapfile.save()
-  cb('//@ sourceMappingURL=' + mapfile.basename);
-}
-
 
   b.bundle()
   .pipe(mold.transform(mapFileUrlComment))
