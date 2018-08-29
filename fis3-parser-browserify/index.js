@@ -1,21 +1,18 @@
 'use strict';
 var path = require('path');
 
-var through2 = require('through2');
+var through = require('through2');
 var deasync = require('deasync');
 var browserify = require('browserify');
 var browserifyInc = require('browserify-incremental')
 
 var partialify = require('partialify/custom');
 var cssy = require('./cssy');
-var eslintify = require('eslintify');
+var eslintify = require('./eslintify');
 var shimixify = require('shimixify');
 var derequire = require('derequire');
 
-var babelify = require('babelify');
-var env = require('babel-preset-env');
-var react = require('babel-preset-react');
-var stage0 = require('babel-preset-stage-0');
+var babelify = require('./babelify');
 
 var collapser = require('bundle-collapser/plugin');
 
@@ -44,6 +41,8 @@ module.exports = function(content, file, conf) {
   var cachePath = path.join(project.getCachePath('compile'), 'release-' + currentMedia);
   var cacheFile = path.join(cachePath, file.basename + id + '.json');
 
+  var runtimePath = path.resolve(require.resolve('@babel/runtime/package.json'), '../../../');
+
   var b = browserify({
     cache: {},
     debug: true,
@@ -52,11 +51,7 @@ module.exports = function(content, file, conf) {
     fullPaths: fullPaths || (currentMedia === 'dev'),
     insertGlobalVars: insertGlobalVars,
     packageCache: {},
-    paths: [
-      path.resolve(__dirname, '../../node_modules'),
-      './node_modules',
-      './'
-    ],
+    paths: [ runtimePath ],
     transform: options.transform,
     ignoreTransform: options.ignoreTransform,
     standalone: standalone
@@ -92,62 +87,80 @@ module.exports = function(content, file, conf) {
     file.cache.addDeps(obj.file);
   });
 
+  if(options.eslint){
+    b.transform(eslintify, {
+      baseConfig: require('./eslintrc'),
+      formatter: 'stylish', //codeframe,table,stylish
+      continuous: true,
+      useEslintrc: false
+    });
+  }
 
-  b.transform(eslintify, {
-    baseConfig: require('./eslintrc'),
-    formatter: 'stylish', //codeframe,table,stylish
-    continuous: true,
-    useEslintrc: false
-  });
-
-  
   // 编译 es6 &&  react
   b.transform(babelify, {
     presets: [
-      [env, {
-        targets: {
-          browsers: ["last 2 versions", "safari >= 7"]
-        },
-        useBuiltIns: true,
-        include: [
-          'transform-es2015-arrow-functions', 
-          'es6.map', 
-          'es6.object.assign', 
-          'es6.array.find', 
-          'es6.array.find-index', 
-          'es7.array.includes'
-        ],
+      [require('@babel/preset-env'), {
+        targets: { chrome : '58', ie: '9', ios: '8', android: '4.1'},
+        useBuiltIns: 'entry',
+        configPath: runtimePath
       }],
-      stage0,
-      react
+      require('@babel/preset-react')
     ],
-    babelrc: false,
     plugins: [
-      require.resolve('babel-plugin-transform-decorators-legacy'),
-      require.resolve('babel-plugin-transform-runtime'),
-      [require.resolve('babel-plugin-styled-components'), { displayName: false }]
+      //styled-components
+      [require.resolve('babel-plugin-styled-components'), { displayName: false }],
+
+      //decorators
+      [require.resolve('@babel/plugin-proposal-decorators'), {legacy: true}],
+      [require.resolve('@babel/plugin-proposal-class-properties'), {loose: true}],
+
+      //runtime
+      require.resolve('@babel/plugin-transform-runtime'),
+
+      //stage0
+      require('@babel/plugin-proposal-function-bind'),
+
+      // Stage 1
+      require.resolve('@babel/plugin-proposal-export-default-from'),
+      require.resolve('@babel/plugin-proposal-logical-assignment-operators'),
+      [require.resolve('@babel/plugin-proposal-optional-chaining'), { "loose": false }],
+      [require.resolve('@babel/plugin-proposal-pipeline-operator'), { "proposal": "minimal" }],
+      [require.resolve('@babel/plugin-proposal-nullish-coalescing-operator'), { "loose": false }],
+      require.resolve('@babel/plugin-proposal-do-expressions'),
+
+      // Stage 2
+      require.resolve('@babel/plugin-proposal-function-sent'),
+      require.resolve('@babel/plugin-proposal-export-namespace-from'),
+      require.resolve('@babel/plugin-proposal-numeric-separator'),
+      require.resolve('@babel/plugin-proposal-throw-expressions'),
+
+      // Stage 3
+      require.resolve('@babel/plugin-syntax-dynamic-import'),
+      require.resolve('@babel/plugin-syntax-import-meta'),
+      require.resolve('@babel/plugin-proposal-json-strings')
     ],
     extensions: ['.es6', '.jsx', '.js'],
-    global: true ,
-    ignore: /\/node_modules\// ,
-    only: options.babelOnly
+    babelrc: false,
+    // global: true ,
+    // ignore: ['node_modules/*'] ,
+    // only: options.babelOnly
   });
- 
+
   //编译css
   b.transform(cssy, { global: true });
-  
+
   b.transform(shimixify.configure({ shims: shims }), { global: true });
 
   b.transform(partialify.onlyAllow(['xml', 'csv', 'html', 'svg', 'json', 'tpl']));
 
   var bufferHelper = new BufferHelper();
 
-  var stream = through2(write, end);
+  var stream = through(write, end);
 
-  function write(chunk, enc, next) {
+  function write(chunk, enc, cb) {
     bufferHelper.concat(chunk);
     process.stdout.write('.');
-    next();
+    cb(null, chunk);
   }
 
   function end(done) {

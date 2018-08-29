@@ -83,7 +83,12 @@ module.exports = function(file, transformOptions) {
     }
 
     function css(cssContent){
-      return postcss(postcssPlus).process(cssContent, {annotation: false, parser: safe});
+      return postcss(postcssPlus)
+      .process(cssContent, {
+        annotation: false,
+        parser: safe,
+        from: file
+      });
     }
 
     function isInline(url) {

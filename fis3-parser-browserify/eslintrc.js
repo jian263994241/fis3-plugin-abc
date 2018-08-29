@@ -31,7 +31,10 @@ globals.forEach(function(key) {
 
 module.exports = {
   "parser": "babel-eslint",
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
   "globals": globalsTrue,
   "env": {
     "browser": true,
@@ -45,6 +48,11 @@ module.exports = {
       "jsx": true
     },
     "sourceType": "module"
+  },
+  "settings": {
+    "react": {
+      "version": "999.999.999"
+    }
   },
   "plugins": ["react", "babel"],
   "rules": {

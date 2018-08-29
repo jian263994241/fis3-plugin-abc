@@ -125,29 +125,22 @@ server.init({
     middleware: middleware
   },
   files: [
-    {
-      match: [
-        path.join(DOCUMENT_ROOT, '/**/*.html'),
-        path.join(DOCUMENT_ROOT, '/**/*.js'),
-        path.join(DOCUMENT_ROOT, '/**/*.css')
-      ],
-      fn: function (event, file) {
-        console.log(event);
-        if (event === "change" || event === "add") {
-          server.reload(file);
-        }
-      },
-    }
+    path.join(DOCUMENT_ROOT, '/**/*.html'),
+    path.join(DOCUMENT_ROOT, '/**/*.js'),
+    path.join(DOCUMENT_ROOT, '/**/*.css')
   ],
   port: port,
   open: false,
   notify: false,
   https: https,
-  reloadDebounce: 300,
+  // reloadDebounce: 2000,
+  // reloadDelay: 2000,
   injectChanges: true,
   ui: false,
   logPrefix: "cue",
-  reloadOnRestart: true,
+  scrollProportionally: false,
+  ghostMode: false,
+  // reloadOnRestart: true,
   rewriteRules: rewriteRules
 }, function(e) {
   console.log(' Listening on ' + (https ? 'https' : 'http') + '://127.0.0.1:%d', port);
