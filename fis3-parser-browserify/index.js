@@ -13,7 +13,8 @@ var shimixify = require('shimixify');
 var derequire = require('derequire');
 
 var babelify = require('./babelify');
-
+var resolve = require('resolve-shimify');
+var babelPlugins = require('./babel-plugins');
 var collapser = require('bundle-collapser/plugin');
 
 //Externalizes the source map found inside a stream to an external .map file or stream.
@@ -42,6 +43,8 @@ module.exports = function(content, file, conf) {
   var cacheFile = path.join(cachePath, file.basename + id + '.json');
 
   var runtimePath = path.resolve(require.resolve('@babel/runtime/package.json'), '../../../');
+
+  var documentRoot = fis.project.getProjectPath();
 
   var b = browserify({
     cache: {},
@@ -81,6 +84,10 @@ module.exports = function(content, file, conf) {
   //修改id减少包体积
   b.plugin(collapser);
 
+  b.plugin(resolve, function(module){
+    return module.replace('$', documentRoot)
+  });
+
   b.external(externals);
 
   b.pipeline.get('deps').on('data', function(obj) {
@@ -106,39 +113,7 @@ module.exports = function(content, file, conf) {
       }],
       require('@babel/preset-react')
     ],
-    plugins: [
-      //styled-components
-      [require.resolve('babel-plugin-styled-components'), { displayName: false }],
-
-      //decorators
-      [require.resolve('@babel/plugin-proposal-decorators'), {legacy: true}],
-      [require.resolve('@babel/plugin-proposal-class-properties'), {loose: true}],
-
-      //runtime
-      require.resolve('@babel/plugin-transform-runtime'),
-
-      //stage0
-      require('@babel/plugin-proposal-function-bind'),
-
-      // Stage 1
-      require.resolve('@babel/plugin-proposal-export-default-from'),
-      require.resolve('@babel/plugin-proposal-logical-assignment-operators'),
-      [require.resolve('@babel/plugin-proposal-optional-chaining'), { "loose": false }],
-      [require.resolve('@babel/plugin-proposal-pipeline-operator'), { "proposal": "minimal" }],
-      [require.resolve('@babel/plugin-proposal-nullish-coalescing-operator'), { "loose": false }],
-      require.resolve('@babel/plugin-proposal-do-expressions'),
-
-      // Stage 2
-      require.resolve('@babel/plugin-proposal-function-sent'),
-      require.resolve('@babel/plugin-proposal-export-namespace-from'),
-      require.resolve('@babel/plugin-proposal-numeric-separator'),
-      require.resolve('@babel/plugin-proposal-throw-expressions'),
-
-      // Stage 3
-      require.resolve('@babel/plugin-syntax-dynamic-import'),
-      require.resolve('@babel/plugin-syntax-import-meta'),
-      require.resolve('@babel/plugin-proposal-json-strings')
-    ],
+    plugins: babelPlugins,
     extensions: ['.es6', '.jsx', '.js'],
     babelrc: false,
     // global: true ,
@@ -178,7 +153,6 @@ module.exports = function(content, file, conf) {
       return ;
     }
 
-    var documentRoot = fis.project.getProjectPath();
     var mapfile = fis.file.wrap(path.join(documentRoot, file.release + '.map'));
     mapfile.setContent(sourcemap.toJSON(2));
     mapfile.save()
