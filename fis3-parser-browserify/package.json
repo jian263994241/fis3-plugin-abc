@@ -1,6 +1,6 @@
 {
   "name": "fis3-parser-browserify",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "fis3 browserify 插件",
   "main": "index.js",
   "scripts": {
@@ -41,7 +41,7 @@
     "@babel/runtime-corejs2": "^7.0.0",
     "autoprefixer": "^6.3.6",
     "babel-eslint": "^7.1.0",
-    "babel-plugin-styled-components": "^1.5.1",
+    "babel-plugin-styled-components": "^1.8.0",
     "browserify": "^13.3.0",
     "browserify-incremental": "^3.1.1",
     "bufferhelper": "^0.2.1",
