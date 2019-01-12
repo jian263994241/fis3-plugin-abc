@@ -16,6 +16,7 @@ var babelify = require('./babelify');
 var resolve = require('resolve-shimify');
 var babelPlugins = require('./babel-plugins');
 var collapser = require('bundle-collapser/plugin');
+var commonShake = require('common-shakeify');
 
 //Externalizes the source map found inside a stream to an external .map file or stream.
 var mold = require('mold-source-map');
@@ -33,6 +34,8 @@ module.exports = function(content, file, conf) {
   var externalRequireName = options.externalRequireName || '$require';
   var fullPaths = options.fullPaths;
 
+  var isDev = (process.env.NODE_ENV === 'development');
+
   var _ = fis.util;
   var project = fis.project;
   var currentMedia = project.currentMedia();
@@ -42,13 +45,17 @@ module.exports = function(content, file, conf) {
   var cachePath = path.join(project.getCachePath('compile'), 'release-' + currentMedia);
   var cacheFile = path.join(cachePath, file.basename + id + '.json');
 
+  if(!fis.util.exists(cacheFile)){
+    fis.util.write(cacheFile, '');
+  }
+
   var runtimePath = path.resolve(require.resolve('@babel/runtime/package.json'), '../../../');
 
   var documentRoot = fis.project.getProjectPath();
 
   var b = browserify({
     cache: {},
-    debug: true,
+    debug: isDev,
     externalRequireName: externalRequireName,
     extensions: ['.js', '.es6', '.jsx'],
     fullPaths: fullPaths || (currentMedia === 'dev'),
@@ -83,6 +90,10 @@ module.exports = function(content, file, conf) {
   }
   //修改id减少包体积
   b.plugin(collapser);
+
+  if(!isDev){
+    b.plugin(commonShake);
+  }
 
   b.plugin(resolve, function(module){
     return module.replace('$', documentRoot)
@@ -177,13 +188,16 @@ module.exports = function(content, file, conf) {
 
   content = bufferHelper.toBuffer().toString();
 
-  content = derequire(content, [{
-    from: 'require',
-    to: '_dereq_'
-  }, {
-    from: 'define',
-    to: '_defi_'
-  }]);
+  if(!isDev){
+    content = derequire(content, [{
+      from: 'require',
+      to: '_dereq_'
+    }, {
+      from: 'define',
+      to: '_defi_'
+    }]);
+  }
+
 
   return content;
 }
