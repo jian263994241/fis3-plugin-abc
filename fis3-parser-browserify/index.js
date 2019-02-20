@@ -1,29 +1,21 @@
 'use strict';
 var path = require('path');
-
 var through = require('through2');
 var deasync = require('deasync');
-var browserify = require('browserify');
-var browserifyInc = require('browserify-incremental')
-
-var partialify = require('partialify/custom');
+var browserifyInc = require('./lib/incremental');
 var cssy = require('./cssy');
-var eslintify = require('./eslintify');
 var shimixify = require('shimixify');
-var derequire = require('derequire');
-
-var babelify = require('./babelify');
+var babelify = require('babelify');
 var resolve = require('resolve-shimify');
-var babelPlugins = require('./babel-plugins');
-var collapser = require('bundle-collapser/plugin');
-var commonShake = require('common-shakeify');
+var findNodeModules = require('find-node-modules');
+// var eslintify = require('./eslintify');
 
 //Externalizes the source map found inside a stream to an external .map file or stream.
 var mold = require('mold-source-map');
 var BufferHelper = require('bufferhelper');
+var _ = fis.util;
 
 module.exports = function(content, file, conf) {
-
   var options = conf.option || conf;
   var shims = options.shims || {}; // object
   var externals = options.externals || '';  //array || string
@@ -36,38 +28,28 @@ module.exports = function(content, file, conf) {
 
   var isDev = (process.env.NODE_ENV === 'development');
 
-  var _ = fis.util;
   var project = fis.project;
   var currentMedia = project.currentMedia();
   var isDone = false;
 
-  var id = _.md5(file.origin, 8);
-  var cachePath = path.join(project.getCachePath('compile'), 'release-' + currentMedia);
-  var cacheFile = path.join(cachePath, file.basename + id + '.json');
+  var cacheFile = project.getCachePath('compile', 'release-' + currentMedia, file.filename + '.bs.json');
 
   if(!fis.util.exists(cacheFile)){
     fis.util.write(cacheFile, '');
   }
 
-  var runtimePath = path.resolve(require.resolve('@babel/runtime/package.json'), '../../../');
-
   var documentRoot = fis.project.getProjectPath();
 
-  var b = browserify({
-    cache: {},
+  var b = browserifyInc({
     debug: isDev,
     externalRequireName: externalRequireName,
     extensions: ['.js', '.es6', '.jsx'],
     fullPaths: fullPaths || (currentMedia === 'dev'),
     insertGlobalVars: insertGlobalVars,
-    packageCache: {},
-    paths: [ runtimePath ],
+    paths: findNodeModules('@babel'),
     transform: options.transform,
     ignoreTransform: options.ignoreTransform,
-    standalone: standalone
-  });
-
-  browserifyInc(b, {
+    standalone: standalone,
     cacheFile: cacheFile
   });
 
@@ -88,12 +70,6 @@ module.exports = function(content, file, conf) {
       }
     });
   }
-  //修改id减少包体积
-  b.plugin(collapser);
-
-  if(!isDev){
-    b.plugin(commonShake);
-  }
 
   b.plugin(resolve, function(module){
     return module.replace('$', documentRoot)
@@ -105,26 +81,18 @@ module.exports = function(content, file, conf) {
     file.cache.addDeps(obj.file);
   });
 
-  if(options.eslint){
-    b.transform(eslintify, {
-      baseConfig: require('./eslintrc'),
-      formatter: 'stylish', //codeframe,table,stylish
-      continuous: true,
-      useEslintrc: false
-    });
-  }
+  // if(options.eslint){
+  //   b.transform(eslintify, {
+  //     baseConfig: require('./eslintrc'),
+  //     formatter: 'stylish', //codeframe,table,stylish
+  //     continuous: true,
+  //     useEslintrc: false
+  //   });
+  // }
 
   // 编译 es6 &&  react
   b.transform(babelify, {
-    presets: [
-      [require('@babel/preset-env'), {
-        targets: { chrome : '58', ie: '9', ios: '8', android: '4.1'},
-        useBuiltIns: 'entry',
-        configPath: runtimePath
-      }],
-      require('@babel/preset-react')
-    ],
-    plugins: babelPlugins,
+    presets: [ require('babel-preset') ],
     extensions: ['.es6', '.jsx', '.js'],
     babelrc: false,
     // global: true ,
@@ -136,8 +104,6 @@ module.exports = function(content, file, conf) {
   b.transform(cssy, { global: true });
 
   b.transform(shimixify.configure({ shims: shims }), { global: true });
-
-  b.transform(partialify.onlyAllow(['xml', 'csv', 'html', 'svg', 'json', 'tpl']));
 
   var bufferHelper = new BufferHelper();
 
@@ -187,17 +153,6 @@ module.exports = function(content, file, conf) {
   });
 
   content = bufferHelper.toBuffer().toString();
-
-  if(!isDev){
-    content = derequire(content, [{
-      from: 'require',
-      to: '_dereq_'
-    }, {
-      from: 'define',
-      to: '_defi_'
-    }]);
-  }
-
 
   return content;
 }
