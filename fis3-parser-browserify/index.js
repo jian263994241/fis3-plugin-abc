@@ -95,19 +95,15 @@ module.exports = function(content, file, conf) {
     ignore: ['node_modules']
   });
 
-  b.plugin(resolve, function(module){
-    return module.replace(
-      new RegExp(`^${options.shortPath}(.+)`),
-      function( target, subpath, index){
-        return path.join(documentRoot, subpath)
-      }
-    )
-  });
-
   //编译css
   b.transform(cssy, { global: true });
 
   b.transform(shimixify.configure({ shims: shims }), { global: true });
+
+  b.plugin(resolve, module => module.replace(
+    new RegExp(new RegExp('^\\' + shortPath +'(.+)')),
+    ( target, subpath, index) => path.join(documentRoot, subpath)
+  ));
 
   var bufferHelper = new BufferHelper();
 
