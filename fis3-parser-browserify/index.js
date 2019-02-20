@@ -25,6 +25,7 @@ module.exports = function(content, file, conf) {
   var insertGlobalVars = options.insertGlobalVars || {}; // {var: (file, basedir)=>var}
   var externalRequireName = options.externalRequireName || '$require';
   var fullPaths = options.fullPaths;
+  var shortPath = options.shortPath || '~';
 
   var isDev = (process.env.NODE_ENV === 'development');
 
@@ -71,10 +72,6 @@ module.exports = function(content, file, conf) {
     });
   }
 
-  b.plugin(resolve, function(module){
-    return module.replace('$', documentRoot)
-  });
-
   b.external(externals);
 
   b.pipeline.get('deps').on('data', function(obj) {
@@ -95,9 +92,16 @@ module.exports = function(content, file, conf) {
     presets: [ require('babel-preset') ],
     extensions: ['.es6', '.jsx', '.js'],
     babelrc: false,
-    // global: true ,
-    // ignore: ['node_modules/*'] ,
-    // only: options.babelOnly
+    ignore: ['node_modules']
+  });
+
+  b.plugin(resolve, function(module){
+    return module.replace(
+      new RegExp(`^${options.shortPath}(.+)`),
+      function( target, subpath, index){
+        return path.join(documentRoot, subpath)
+      }
+    )
   });
 
   //编译css
