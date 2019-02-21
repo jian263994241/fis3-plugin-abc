@@ -1,6 +1,6 @@
 {
   "name": "fis3-parser-browserify",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "fis3 browserify 插件",
   "main": "index.js",
   "scripts": {
@@ -43,6 +43,7 @@
     "postcss-sorting": "^3.1.0",
     "resolve-shimify": "^1.0.0",
     "shimixify": "^1.1.5",
+    "show-stream-progress": "^0.1.1",
     "through2": "^2.0.3"
   },
   "repository": {

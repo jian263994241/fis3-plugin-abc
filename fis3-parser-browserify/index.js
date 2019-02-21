@@ -136,6 +136,8 @@ module.exports = function(content, file, conf) {
     cb('//@ sourceMappingURL=' + mapfile.basename);
   }
 
+  b.pipeline.get('deps').pipe(require('show-stream-progress')(process.stderr))
+
   b.bundle()
   .pipe(mold.transform(mapFileUrlComment))
   .pipe(stream)
