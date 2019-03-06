@@ -25,7 +25,11 @@ module.exports = function(content, file, conf) {
   var insertGlobalVars = options.insertGlobalVars || {}; // {var: (file, basedir)=>var}
   var externalRequireName = options.externalRequireName || '$require';
   var fullPaths = options.fullPaths;
-  var shortPath = options.shortPath || '~';
+
+  var documentRoot = fis.project.getProjectPath();
+  var cwd = process.cwd();
+
+  var alias = Object.assign({}, {'~': documentRoot}, options.alias);
 
   var isDev = (process.env.NODE_ENV === 'development');
 
@@ -38,8 +42,6 @@ module.exports = function(content, file, conf) {
   if(!fis.util.exists(cacheFile)){
     fis.util.write(cacheFile, '');
   }
-
-  var documentRoot = fis.project.getProjectPath();
 
   var b = browserifyInc({
     debug: isDev,
@@ -100,10 +102,15 @@ module.exports = function(content, file, conf) {
 
   b.transform(shimixify.configure({ shims: shims }), { global: true });
 
-  b.plugin(resolve, module => module.replace(
-    new RegExp(new RegExp('^\\' + shortPath +'(.+)')),
-    ( target, subpath, index) => path.join(documentRoot, subpath)
-  ));
+  b.plugin(resolve, module => {
+    Object.keys(alias).forEach( key => {
+      module = module.replace(
+        new RegExp(new RegExp('^\\' + key +'(.+)')),
+        ( target, subpath, index) => path.join(path.resolve(cwd, alias[key]), subpath)
+      )
+    })
+    return module;
+  });
 
   var bufferHelper = new BufferHelper();
 
